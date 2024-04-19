@@ -40,7 +40,7 @@ public class CreateCommand extends SubCommand {
 
     @Override
     public void perform(Player player, String[] args) {
-        if (isMusicDisc(player)) {
+        if (CustomDiscs.isMusicDisc(player)) {
             if (args.length >= 3) {
 
                 if (!player.hasPermission("customdiscs.create")) {
@@ -156,10 +156,6 @@ public class CreateCommand extends SubCommand {
         } else {
             return sb.toString().substring(0, sb.length()-1);
         }
-    }
-
-    private boolean isMusicDisc(Player p) {
-        return p.getInventory().getItemInMainHand().getType().toString().contains("MUSIC_DISC");
     }
 
 }
