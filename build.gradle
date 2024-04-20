@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id "com.github.johnrengelman.shadow" version "7.1.0"
+    id("maven-publish")
 }
 
 sourceCompatibility = JavaLanguageVersion.of(java_version as int)
@@ -63,4 +64,22 @@ shadowJar {
     classifier 'shadow-dev'
     //relocate 'javazoom', "me.navoei.${mod_id}.javazoom"
     //relocate 'org.tritonus', "me.navoei.${mod_id}.tritonus"
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Athar42/CustomDiscs")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
 }
