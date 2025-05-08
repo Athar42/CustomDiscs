@@ -1,4 +1,4 @@
-# Custom Discs v4.4 for Paper 1.21.5
+# Custom Discs v4.4.1 for Paper 1.21.5
 
 _This release should also work with Paper 1.21.4_
 
