@@ -1,4 +1,4 @@
-# Custom Discs v5.1.4
+# Custom Discs v5.1.5
 ### For Paper and Folia
 ### 1.21.7 to 1.21.11
 
@@ -52,9 +52,9 @@ Versions support matrix :
 | **1.21.4**                                 | Paper           | 4.2 - 4.4                      | [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)        |
 | **1.21.5**                                 | Paper           | 4.4                            | [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)        |
 | **1.21.6, 1.21.7-8**                       | Paper           | 4.5                            | [4.5](https://github.com/Navoei/CustomDiscs/releases/tag/v4.5)        |
-| **1.21.7-9, 1.21.8**<br>**1.21.8**         | Paper<br>Folia  | 5.0 - 5.1.4<br>5.1.1 - 5.1.4   | [5.1.4](https://modrinth.com/plugin/customdiscs-plugin/version/5.1.4) |
-| **1.21.9, 1.21.10**<br>**1.21.9, 1.21.10** | Paper<br>Folia  | 5.1.2 - 5.1.4<br>5.1.2 - 5.1.4 | [5.1.4](https://modrinth.com/plugin/customdiscs-plugin/version/5.1.4) |
-| **1.21.11**<br>**1.21.11**                 | Paper<br>Folia  | 5.1.3 - 5.1.4<br>5.1.3 - 5.1.4 | [5.1.4](https://modrinth.com/plugin/customdiscs-plugin/version/5.1.4) |
+| **1.21.7-9, 1.21.8**<br>**1.21.8**         | Paper<br>Folia  | 5.0 - 5.1.5<br>5.1.1 - 5.1.5   | [5.1.4](https://modrinth.com/plugin/customdiscs-plugin/version/5.1.5) |
+| **1.21.9, 1.21.10**<br>**1.21.9, 1.21.10** | Paper<br>Folia  | 5.1.2 - 5.1.5<br>5.1.2 - 5.1.5 | [5.1.4](https://modrinth.com/plugin/customdiscs-plugin/version/5.1.5) |
+| **1.21.11**<br>**1.21.11**                 | Paper<br>Folia  | 5.1.3 - 5.1.5<br>5.1.3 - 5.1.5 | [5.1.4](https://modrinth.com/plugin/customdiscs-plugin/version/5.1.5) |
 
 https://user-images.githubusercontent.com/64107368/178426026-c454ac66-5133-4f3a-9af9-7f674e022423.mp4
 

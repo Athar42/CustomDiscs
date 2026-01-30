@@ -4,6 +4,7 @@ import me.Navoei.customdiscsplugin.CustomDiscs;
 import me.Navoei.customdiscsplugin.PlayerManager;
 import me.Navoei.customdiscsplugin.VoicePlugin;
 import me.Navoei.customdiscsplugin.language.Lang;
+import me.Navoei.customdiscsplugin.utils.TypeChecker;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -48,7 +49,7 @@ public class HeadPlay implements Listener{
         if (PlayerManager.instance().isAudioPlayerPlaying(noteBlock.getLocation())) return;
 
         Block headBlock = noteBlock.getRelative(BlockFace.UP);
-        if (headBlock.getType() != Material.PLAYER_HEAD) return;
+        if (!TypeChecker.isHead(headBlock.getType())) return;
 
         Skull skull = (Skull) headBlock.getState();
         PersistentDataContainer persistentDataContainer = skull.getPersistentDataContainer();
@@ -88,16 +89,15 @@ public class HeadPlay implements Listener{
     public void onHeadPlace(BlockPlaceEvent event) {
         ItemStack item = event.getItemInHand();
 
-        if (item.getType() != Material.PLAYER_HEAD) return;
+        if (!TypeChecker.isHead(item.getType())) return;
         if (!(item.getItemMeta() instanceof SkullMeta meta)) return;
 
         PersistentDataContainer itemPDC = meta.getPersistentDataContainer();
         if (!itemPDC.has(new NamespacedKey(customDiscs, "customhead"), PersistentDataType.STRING)) return;
 
         Block block = event.getBlockPlaced();
+        if (!TypeChecker.isHead(block.getType()) && !TypeChecker.isWallHead(block.getType())) return;
         Bukkit.getRegionScheduler().runDelayed(customDiscs, block.getLocation(), task -> {
-            if (block.getType() != Material.PLAYER_HEAD && block.getType() != Material.PLAYER_WALL_HEAD) return;
-
             Skull skull = (Skull) block.getState();
             PersistentDataContainer blockPDC = skull.getPersistentDataContainer();
 

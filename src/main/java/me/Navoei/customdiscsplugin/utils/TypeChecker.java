@@ -9,6 +9,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 public class TypeChecker {
     static CustomDiscs customDiscs = CustomDiscs.getInstance();
 
@@ -55,12 +58,40 @@ public class TypeChecker {
 
     // PLAYER HEADS
 
+    private static final Set<Material> HEAD_LIST_MATERIALS = EnumSet.of(
+            Material.PLAYER_HEAD,
+            Material.WITHER_SKELETON_SKULL,
+            Material.SKELETON_SKULL,
+            Material.ZOMBIE_HEAD,
+            Material.CREEPER_HEAD,
+            Material.PIGLIN_HEAD,
+            Material.DRAGON_HEAD
+    );
+
+    private static final Set<Material> HEAD_WALL_LIST_MATERIALS = EnumSet.of(
+            Material.PLAYER_WALL_HEAD,
+            Material.WITHER_SKELETON_WALL_SKULL,
+            Material.SKELETON_WALL_SKULL,
+            Material.ZOMBIE_WALL_HEAD,
+            Material.CREEPER_WALL_HEAD,
+            Material.PIGLIN_WALL_HEAD,
+            Material.DRAGON_WALL_HEAD
+    );
+
     /*public static boolean isHead(ItemStack item) {
         return item.getType().toString().contains("PLAYER_HEAD");
     }*/
 
+    public static boolean isHead(Material material) {
+        return HEAD_LIST_MATERIALS.contains(material);
+    }
+
+    public static boolean isWallHead(Material material) {
+        return HEAD_WALL_LIST_MATERIALS.contains(material);
+    }
+
     public static boolean isHeadPlayer(Player p) {
-        return p.getInventory().getItemInMainHand().getType().equals(Material.PLAYER_HEAD);
+        return isHead(p.getInventory().getItemInMainHand().getType());
     }
 
     /*public static boolean isCustomHead(ItemStack itemStack) {
