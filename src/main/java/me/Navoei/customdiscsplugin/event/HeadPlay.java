@@ -15,22 +15,31 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Skull;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.NotePlayEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import javax.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class HeadPlay implements Listener{
@@ -46,7 +55,7 @@ public class HeadPlay implements Listener{
 
         if (noteBlock.getType() != Material.NOTE_BLOCK) return;
 
-        if (PlayerManager.instance().isAudioPlayerPlaying(noteBlock.getLocation())) return;
+        if (PlayerManager.instance().isAudioPlayerPlaying(noteBlock.getLocation())) playerManager.stopDisc(noteBlock);
 
         Block headBlock = noteBlock.getRelative(BlockFace.UP);
         if (!TypeChecker.isHead(headBlock.getType())) return;
@@ -122,6 +131,124 @@ public class HeadPlay implements Listener{
 
             skull.update(true, true);
         }, 1L);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onHeadBreak(BlockBreakEvent event) {
+        Block block = event.getBlock();
+        if (!TypeChecker.isHead(block.getType()) && !TypeChecker.isWallHead(block.getType())) return;
+
+        Skull headSkull = (Skull) block.getState();
+
+        PersistentDataContainer headPDC = headSkull.getPersistentDataContainer();
+        if (!headPDC.has(new NamespacedKey(customDiscs, "customhead"), PersistentDataType.STRING)) return;
+
+        Block noteblockBlockChecker = block.getRelative(BlockFace.DOWN);
+
+        if (noteblockBlockChecker.getType() != Material.NOTE_BLOCK) return;
+
+        playerManager.stopDisc(noteblockBlockChecker);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onHeadDrop(BlockDropItemEvent event) {
+        BlockState blockState = event.getBlockState();
+
+        if (!(blockState instanceof Skull skull)) return;
+
+        PersistentDataContainer blockPDC = skull.getPersistentDataContainer();
+
+        NamespacedKey headKey = new NamespacedKey(customDiscs, "customhead");
+        NamespacedKey loreKey = new NamespacedKey(customDiscs, "headlore");
+        NamespacedKey rangeKey = new NamespacedKey(customDiscs, "range");
+
+        for (Item itemEntity : event.getItems()) {
+            ItemStack droppedStack = itemEntity.getItemStack();
+            if (!TypeChecker.isHead(droppedStack.getType()) && !TypeChecker.isWallHead(droppedStack.getType())) continue;
+
+            ItemMeta droppedMeta = droppedStack.getItemMeta();
+            if (droppedMeta == null) continue;
+
+            PersistentDataContainer droppedItemPDC = droppedMeta.getPersistentDataContainer();
+
+            String customHeadRetrieved = blockPDC.get(headKey, PersistentDataType.STRING);
+            if (customHeadRetrieved != null) {
+                droppedItemPDC.set(headKey, PersistentDataType.STRING, customHeadRetrieved);
+            }
+
+            String loreRetrieved = blockPDC.get(loreKey, PersistentDataType.STRING);
+            if (loreRetrieved != null) {
+                droppedItemPDC.set(loreKey, PersistentDataType.STRING, loreRetrieved);
+
+                Component deserialized = GsonComponentSerializer.gson().deserialize(loreRetrieved);
+                @Nullable List<Component> itemLore = new ArrayList<>();
+                itemLore.add(deserialized);
+                droppedMeta.lore(itemLore);
+            }
+
+            Float rangeRetrieved = blockPDC.get(rangeKey, PersistentDataType.FLOAT);
+            if (rangeRetrieved != null) {
+                droppedItemPDC.set(rangeKey, PersistentDataType.FLOAT, rangeRetrieved);
+            }
+
+            droppedStack.setItemMeta(droppedMeta);
+        }
+    }
+
+    //TODO: To rework someday, so that it retain custom_data infos
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onHeadExplode(EntityExplodeEvent event) {
+        for (Block explodedBlock : event.blockList()) {
+            if (TypeChecker.isHead(explodedBlock.getType()) || TypeChecker.isWallHead(explodedBlock.getType())) {
+                Skull headSkull = (Skull) explodedBlock.getState();
+
+                PersistentDataContainer headPDC = headSkull.getPersistentDataContainer();
+                if (!headPDC.has(new NamespacedKey(customDiscs, "customhead"), PersistentDataType.STRING)) return;
+
+                Block noteblockBlockChecker = explodedBlock.getRelative(BlockFace.DOWN);
+
+                if (noteblockBlockChecker.getType() != Material.NOTE_BLOCK) continue;
+
+                playerManager.stopDisc(noteblockBlockChecker);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onNoteblockHeadBreak(BlockBreakEvent event) {
+        Block block = event.getBlock();
+
+        if (block.getType() != Material.NOTE_BLOCK) return;
+
+        Block headBlockChecker = block.getRelative(BlockFace.UP);
+
+        if (!TypeChecker.isHead(headBlockChecker.getType())) return;
+
+        Skull headSkull = (Skull) headBlockChecker.getState();
+
+        PersistentDataContainer headPDC = headSkull.getPersistentDataContainer();
+        if (!headPDC.has(new NamespacedKey(customDiscs, "customhead"), PersistentDataType.STRING)) return;
+
+        playerManager.stopDisc(block);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onNoteblockHeadExplode(EntityExplodeEvent event) {
+        for (Block explodedBlock : event.blockList()) {
+            if (explodedBlock.getType() == Material.NOTE_BLOCK) {
+
+                Block headBlockChecker = explodedBlock.getRelative(BlockFace.UP);
+
+                if (!TypeChecker.isHead(headBlockChecker.getType())) continue;
+
+                Skull headSkull = (Skull) headBlockChecker.getState();
+
+                PersistentDataContainer headPDC = headSkull.getPersistentDataContainer();
+                if (!headPDC.has(new NamespacedKey(customDiscs, "customhead"), PersistentDataType.STRING)) continue;
+
+                playerManager.stopDisc(explodedBlock);
+            }
+        }
     }
 
 }

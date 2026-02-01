@@ -107,7 +107,7 @@ public class HopperManager implements Listener {
         }
         for (BlockState blockState : event.getChunk().getTileEntities()) {
             if (blockState instanceof Jukebox jukebox) {
-                if (!jukebox.hasRecord()) return;
+                if (!jukebox.hasRecord()) continue;
                 if (!PlayerManager.instance().isAudioPlayerPlaying(blockState.getLocation()) && TypeChecker.isCustomMusicDisc(jukebox.getRecord())) {
                     jukebox.stopPlaying();
                 }

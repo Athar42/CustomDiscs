@@ -136,7 +136,7 @@ public class JukeBox implements Listener{
         for (Block explodedBlock : event.blockList()) {
             if (explodedBlock.getType() == Material.JUKEBOX) {
                 Jukebox jukebox = (Jukebox) explodedBlock.getState();
-                if (!isCustomMusicDisc(jukebox.getRecord())) return;
+                if (!isCustomMusicDisc(jukebox.getRecord())) continue;
                 playerManager.stopDisc(explodedBlock);
             }
         }
