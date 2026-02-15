@@ -141,10 +141,10 @@ public final class CustomDiscs extends JavaPlugin {
                         .clickEvent(ClickEvent.openUrl("https://github.com/Navoei/CustomDiscs"))
                         .hoverEvent(HoverEvent.showText(Component.text("Click to open CustomDiscs' GitHub page")))),
                 LegacyComponentAmpersand.deserialize("&aDiscord&7: ")
-                        .append(Component.text("https://discord.gg/YJpqruvZ97")
+                        .append(Component.text("https://discord.gg/rJtBRmRFCr")
                         .color(NamedTextColor.BLUE)
                         .decorate(TextDecoration.UNDERLINED)
-                        .clickEvent(ClickEvent.openUrl("https://discord.gg/YJpqruvZ97"))
+                        .clickEvent(ClickEvent.openUrl("https://discord.gg/rJtBRmRFCr"))
                         .hoverEvent(HoverEvent.showText(Component.text("Click to join our Discord !"))))
         };
 		
