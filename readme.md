@@ -1,5 +1,6 @@
 # Custom Discs v5.2.0
-### For Paper and Folia — Minecraft 1.21.7 to 1.21.11
+### For Paper and Folia
+### 1.21.7 to 1.21.11
 
 [![GitHub Total Downloads](https://img.shields.io/github/downloads/Navoei/CustomDiscs/total?style=plastic&label=GitHub%20Downloads&color=success "Click here to download the plugin")](https://modrinth.com/plugin/customdiscs-plugin) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [![Modrinth Downloads](https://img.shields.io/modrinth/dt/customdiscs-plugin?style=plastic&label=Modrinth%20Downloads&color=success "Click here to download the plugin")](https://modrinth.com/plugin/customdiscs-plugin)
 
