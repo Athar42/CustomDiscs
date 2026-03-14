@@ -1,13 +1,13 @@
 package me.Navoei.customdiscsplugin.event;
 
 import me.Navoei.customdiscsplugin.CustomDiscs;
+import me.Navoei.customdiscsplugin.language.Lang;
 import me.Navoei.customdiscsplugin.PlayerManager;
 import me.Navoei.customdiscsplugin.utils.TypeChecker;
 import me.Navoei.customdiscsplugin.VoicePlugin;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 
-import me.Navoei.customdiscsplugin.language.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -37,7 +37,7 @@ import java.util.Optional;
 
 public class HornPlay implements Listener{
 
-    CustomDiscs customDiscs = CustomDiscs.getInstance();
+    CustomDiscs plugin = CustomDiscs.getInstance();
     PlayerManager playerManager = PlayerManager.instance();
 
     private final List<Material> goatHornNotInteractable = Arrays.asList(
@@ -95,12 +95,12 @@ public class HornPlay implements Listener{
                 if (targetBlockType.name().contains("_BED") || targetBlockType.name().contains("_BOAT") || targetBlockType.name().contains("_BUTTON") || targetBlockType.name().contains("CHEST") || targetBlockType.name().contains("_DOOR") /*|| targetBlockType.name().contains("_FENCE_GATE") */|| targetBlockType.name().contains("_GATE") || targetBlockType.name().contains("MINECART") || targetBlockType.name().contains("POTTED_") || targetBlockType.name().contains("_SIGN") || targetBlockType.name().contains("_TRAPDOOR")) return;
             }
 
-            String soundFileName = event.getItem().getItemMeta().getPersistentDataContainer().get(new NamespacedKey(customDiscs, "customhorn"), PersistentDataType.STRING);
+            String soundFileName = event.getItem().getItemMeta().getPersistentDataContainer().get(new NamespacedKey(plugin, "customhorn"), PersistentDataType.STRING);
 
             @Nonnull PersistentDataContainer persistentDataContainer = event.getItem().getItemMeta().getPersistentDataContainer();
 
             float range = CustomDiscs.getInstance().customHornDistance;
-            NamespacedKey customSoundRangeKey = new NamespacedKey(customDiscs, "range");
+            NamespacedKey customSoundRangeKey = new NamespacedKey(plugin, "range");
 
             if(persistentDataContainer.has(customSoundRangeKey, PersistentDataType.FLOAT)) {
                 float soundRange = Optional.ofNullable(persistentDataContainer.get(customSoundRangeKey, PersistentDataType.FLOAT)).orElse(0f);
@@ -108,14 +108,14 @@ public class HornPlay implements Listener{
             }
             
             int hornCooldown;
-            NamespacedKey hornCooldownKey = new NamespacedKey(customDiscs, "goat_horn_cooldown");
+            NamespacedKey hornCooldownKey = new NamespacedKey(plugin, "goat_horn_cooldown");
             if(persistentDataContainer.has(hornCooldownKey, PersistentDataType.INTEGER)) {
                 hornCooldown = Math.min(Optional.ofNullable(persistentDataContainer.get(hornCooldownKey, PersistentDataType.INTEGER)).orElse(0), CustomDiscs.getInstance().hornMaxCooldown);
             } else {
                 hornCooldown = Math.min(CustomDiscs.getInstance().hornCooldown, CustomDiscs.getInstance().hornMaxCooldown);
             }
 
-            Path soundFilePath = Path.of(customDiscs.getDataFolder().getPath(), "musicdata", soundFileName);
+            Path soundFilePath = Path.of(plugin.getDataFolder().getPath(), "musicdata", soundFileName);
 
             if (soundFilePath.toFile().exists()) {
 

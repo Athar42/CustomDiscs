@@ -1,65 +1,111 @@
-# Custom Discs v5.1.5
-### For Paper and Folia
-### 1.21.7 to 1.21.11
+# Custom Discs v5.2.0
+### For Paper and Folia — Minecraft 1.21.7 to 1.21.11
 
 [![GitHub Total Downloads](https://img.shields.io/github/downloads/Navoei/CustomDiscs/total?style=plastic&label=GitHub%20Downloads&color=success "Click here to download the plugin")](https://modrinth.com/plugin/customdiscs-plugin) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [![Modrinth Downloads](https://img.shields.io/modrinth/dt/customdiscs-plugin?style=plastic&label=Modrinth%20Downloads&color=success "Click here to download the plugin")](https://modrinth.com/plugin/customdiscs-plugin)
 
+---
+
+## ⚠️ Dependency notice — PacketEvents required
+
+**Since version 5.2.0, [PacketEvents](https://modrinth.com/plugin/packetevents) (v2.11.2+) is required.**\
+ProtocolLib is no longer used — it can be safely removed if no other plugin needs it.
+
+---
+
 A Paper fork of henkelmax's Audio Player. Special thanks to Athar42 for maintaining this plugin.
-- Play custom music discs, goat horns and player heads using the Simple Voice Chat API. (The voice chat mod is required on the client and server.)
-- Use ```/customdisc``` or ```/cd``` to view available commands.
-- Music files should go into ```plugins/CustomDiscs/musicdata/```
-- Music files must be in the ```.wav```, ```.flac```, or ```.mp3``` format.
 
-Join the discord for support: https://discord.gg/rJtBRmRFCr. The issues section in this repository has been closed.
+Play custom music discs, goat horns and player heads using the [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) API.
 
-Downloading Files:
-- To download a file use the command ```/cd download <url> <filename.extension>```.
-  - The link used to download a file must be a direct link (meaning the file must automatically begin downloading when accessing the link).
-  - Files must have the correct extension specified.
-  - An UnsupportedAudioFileException will be thrown in the server's console if the file extension is not correct (for example when giving a wav file the mp3 extension).
-  - Below is an example of how to use the command and a link to get direct downloads from Google Drive.
-    - Example: ```/cd download "https://example.com/mysong" mysong.mp3```
-    - **To note** : Do not forget to use quotes (") for the URL. Without this, you'll get a command error.
-- Direct Google Drive links: https://lonedev6.github.io/gddl/
+> The Simple Voice Chat mod is required on both the client and the server.
 
-Set the range of a disc:
-- To set the active range of a playable disc, just use the command ```/cd range <range>```.
-  - The range can be between 1 and the max value set in the config file (default : 256)
-- Example: ```/cd range 100```
+- Music files go into `plugins/CustomDiscs/musicdata/`
+- Supported formats: `.wav`, `.flac`, `.mp3`
+- Use `/customdisc` or `/cd` to see available commands
 
-Permission Nodes (Required to run the commands. Playing discs does not require a permission.):
-- ```customdiscs.create``` to create a disc
-- ```customdiscs.download``` to download a file
-- ```customdiscs.range``` to set the range of the disc
-- ```customdiscs.horncooldown``` to set the cooldown (in ticks) for custom goat horns
+Join our Discord for support: https://discord.gg/rJtBRmRFCr
 
-Dependencies:
-- This plugin depends on the latest version of ProtocolLib available for your Paper version and SimpleVoiceChatBukkit (latest is recommended - at least version 2.6.1 required).
+---
 
+## Dependencies
 
-Versions support matrix :
+| Plugin | Required | Notes                              |
+|--------|----------|------------------------------------|
+| [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) | ✅ Required | v2.6.1 minimum                     |
+| [PacketEvents](https://modrinth.com/plugin/packetevents) | ✅ Required | Since v5.2.0 — tested with v2.11.2 |
+| [ProtocolLib](https://github.com/dmulloy2/ProtocolLib) | ⛔ Up to v5.1.4 only | No longer required as of v5.2.0    |
 
-| Minecraft version                          | Server type     | Compatible versions            | Latest compatible<br>version                                          |
-|--------------------------------------------|-----------------|--------------------------------|-----------------------------------------------------------------------|
-| **1.19**                                   | Paper           | 1.1.0 - 2.1                    | [2.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.1)        |
-| **1.19.1, 1.19.2, 1.19.3**                 | Paper           | 2.2 - 2.2.3                    | [2.2.3](https://github.com/Navoei/CustomDiscs/releases/tag/v2.2.3)    |
-| **1.19.4**                                 | Paper           | 2.3 - 2.3.2                    | [2.3.2](https://github.com/Navoei/CustomDiscs/releases/tag/v2.3.2)    |
-| **1.20, 1.20.1**                           | Paper           | 2.4 - 2.4.1                    | [2.4.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.4.1)    |
-| **1.20.2**                                 | Paper           | 2.5 - 2.5.1                    | [2.5.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.5.1)    |
-| **1.20.3, 1.20.4, 1.20.5, 1.20.6**         | Paper           | 2.6 - 2.6.1                    | [2.6.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.6.1)    |
-| **1.21, 1.21.1**                           | Paper           | 3.0                            | [3.0](https://github.com/Navoei/CustomDiscs/releases/tag/v3.0)        |
-| **1.21.2, 1.21.3**                         | Paper           | 4.1                            | [4.1](https://github.com/Navoei/CustomDiscs/releases/tag/v4.1)        |
-| **1.21.4**                                 | Paper           | 4.2 - 4.4                      | [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)        |
-| **1.21.5**                                 | Paper           | 4.4                            | [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)        |
-| **1.21.6, 1.21.7-8**                       | Paper           | 4.5                            | [4.5](https://github.com/Navoei/CustomDiscs/releases/tag/v4.5)        |
-| **1.21.7-9, 1.21.8**<br>**1.21.8**         | Paper<br>Folia  | 5.0 - 5.1.5<br>5.1.1 - 5.1.5   | [5.1.5](https://modrinth.com/plugin/customdiscs-plugin/version/5.1.5) |
-| **1.21.9, 1.21.10**<br>**1.21.9, 1.21.10** | Paper<br>Folia  | 5.1.2 - 5.1.5<br>5.1.2 - 5.1.5 | [5.1.5](https://modrinth.com/plugin/customdiscs-plugin/version/5.1.5) |
-| **1.21.11**<br>**1.21.11**                 | Paper<br>Folia  | 5.1.3 - 5.1.5<br>5.1.3 - 5.1.5 | [5.1.5](https://modrinth.com/plugin/customdiscs-plugin/version/5.1.5) |
+---
 
-https://user-images.githubusercontent.com/64107368/178426026-c454ac66-5133-4f3a-9af9-7f674e022423.mp4
+## Downloading Files
 
-Default Config.yml:
+Use the command `/cd download <url> <filename.extension>` to download an audio file directly to the server.
+
+> **Always write the URL between double quotes.**\
+> Without this, you'll get a command error.
+
+### Direct URL
+
+Any URL that starts an immediate file download when opened in a browser.
+
 ```
+/cd download "https://example.com/mysong.mp3" mysong.mp3
+```
+
+- The file extension in `<filename.extension>` must match the actual format of the file. Providing a wrong extension (e.g. naming a `.wav` file as `.mp3`) will cause an `UnsupportedAudioFileException` in the server console.
+- **Google Drive** — Convert your sharing link to a direct download link: https://lonedev6.github.io/gddl/
+
+### Filebin
+
+[Filebin](https://filebin.net) is a free, no-registration file hosting service. Two URL formats are supported (final `/` is optional, `www.` prefix is accepted in both cases):
+
+**Bin URL** — `https://filebin.net/<bin>`\
+The plugin queries the Filebin API and automatically downloads the first (and only the first) supported audio file found in the bin.
+
+```
+/cd download "https://filebin.net/mybinname" mysong.mp3
+```
+
+**Direct Bin file URL** — `https://filebin.net/<bin>/<filename>`\
+Downloads a specific file from the bin.
+
+```
+/cd download "https://filebin.net/mybinname/mysong.mp3" mysong.mp3
+```
+
+> In all cases, if a file with the requested name already exists on the server, a unique name is automatically assigned (e.g. `mysong_1.mp3`) and you are notified in chat.
+
+---
+
+## Permissions
+
+| Permission | Description                                                          |
+|------------|----------------------------------------------------------------------|
+| `customdiscs.create` | Create a custom disc, goat horn or player head                       |
+| `customdiscs.download` | Download a file from a URL                                           |
+| `customdiscs.range` | Set the audio range of a disc                                        |
+| `customdiscs.horncooldown` | Set the cooldown for custom goat horns                               |
+| `customdiscs.update` | Receive an update notification on join if a new version is available |
+
+> Playing discs does not require any permission.
+
+---
+
+## Setting the range
+
+Use `/cd range <value>` while holding a custom disc, goat horn, or player head to set its hearing range.\
+The range must be between 1 and the maximum value set in `config.yml` for the respective item type (default: 256).
+
+```
+/cd range 100
+```
+
+---
+
+## Configuration
+
+**config.yml**
+
+```yaml
 # [General CustomDiscs Config]
 
 # The maximum download size in megabytes.
@@ -121,10 +167,25 @@ custom-head-distance: 16
 
 # The max distance from which music discs can be heard in blocks.
 custom-head-max-distance: 256
+
+# [Update Checker Config]
+
+# Enable automatic update checks against Modrinth.
+# Operators or players with permission "customdiscs.update" are notified on join when an update is available.
+# An initial check is performed on startup, then every 24 hours as long as the server is running.
+update-checker:
+  enabled: true
+  # Release channel to check against: release, beta
+  channel: release
 ```
 
-Default Lang.yml:
-```
+---
+
+## Language
+
+**lang.yml**
+
+```yaml
 prefix: '&8[&6CustomDiscs&8]&r'
 invalid-filename: '&cThis is an invalid filename!'
 invalid-format: '&cFile must be in wav, flac, or mp3 format!'
@@ -148,5 +209,34 @@ custom-music-disabled: '&7Custom music discs are disabled in the configuration.'
 custom-head-disabled: '&7Custom player heads are disabled in the configuration.'
 custom-horn-disabled: '&7Custom goat horns are disabled in the configuration.'
 invalid-protocol: '&cOnly HTTP:// and HTTPS:// URL are allowed.'
-invalid-filename-length: '&cThe maximum file name is restricted to %filename_length_value% characters'
+invalid-filename-length: '&cThe maximum file name is restricted to %filename_length_value% characters.'
+filebin-no-audio: '&cNo supported audio file (wav/mp3/flac) found in this Filebin bin.'
+filebin-api-error: '&cFailed to access Filebin API. The bin may not exist or is unavailable.'
+file-already-exists: '&eA file named &7%filename%&e already exists, saving as &7%new_filename%&e instead.'
+update-available: '&eA new version of CustomDiscs is available: &6%latest_version% &7(current: %current_version%)'
 ```
+
+---
+
+## Version Support Matrix
+
+| Minecraft version | Paper                                                                         | Folia                                                                         |
+|---|-------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| **1.19** | 1.1.0 – [2.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.1)        | —                                                                             |
+| **1.19.1 – 1.19.3** | 2.2 – [2.2.3](https://github.com/Navoei/CustomDiscs/releases/tag/v2.2.3)      | —                                                                             |
+| **1.19.4** | 2.3 – [2.3.2](https://github.com/Navoei/CustomDiscs/releases/tag/v2.3.2)      | —                                                                             |
+| **1.20, 1.20.1** | 2.4 – [2.4.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.4.1)      | —                                                                             |
+| **1.20.2** | 2.5 – [2.5.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.5.1)      | —                                                                             |
+| **1.20.3 – 1.20.6** | 2.6 – [2.6.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.6.1)      | —                                                                             |
+| **1.21, 1.21.1** | [3.0](https://github.com/Navoei/CustomDiscs/releases/tag/v3.0)                | —                                                                             |
+| **1.21.2, 1.21.3** | [4.1](https://github.com/Navoei/CustomDiscs/releases/tag/v4.1)                | —                                                                             |
+| **1.21.4 – 1.21.5** | 4.2 – [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)          | —                                                                             |
+| **1.21.6, 1.21.7** | [4.5](https://github.com/Navoei/CustomDiscs/releases/tag/v4.5)                | —                                                                             |
+| **1.21.7, 1.21.8** | 5.0 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0)   | 5.1.1 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) |
+| **1.21.9, 1.21.10** | 5.1.2 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) | 5.1.2 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) |
+| **1.21.11** | 5.1.3 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) | 5.1.3 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) |
+
+---
+
+**Demo video:**
+https://user-images.githubusercontent.com/64107368/178426026-c454ac66-5133-4f3a-9af9-7f674e022423.mp4

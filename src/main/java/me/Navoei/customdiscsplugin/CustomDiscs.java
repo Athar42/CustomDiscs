@@ -1,24 +1,27 @@
 package me.Navoei.customdiscsplugin;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
 import me.Navoei.customdiscsplugin.command.CustomDiscCommand;
 import me.Navoei.customdiscsplugin.event.JukeBox;
 import me.Navoei.customdiscsplugin.event.HeadPlay;
 import me.Navoei.customdiscsplugin.event.HornPlay;
 import me.Navoei.customdiscsplugin.language.Lang;
+import me.Navoei.customdiscsplugin.utils.ServerVersionChecker;
+import me.Navoei.customdiscsplugin.utils.UpdateChecker;
 
 import de.maxhenkel.voicechat.api.BukkitVoicechatService;
+
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.util.Vector3i;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEffect;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIPaperConfig;
 
-import me.Navoei.customdiscsplugin.utils.ServerVersionChecker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -26,10 +29,14 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.NamespacedKey;
+
 import org.bukkit.block.Jukebox;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
@@ -40,9 +47,11 @@ import java.util.logging.Logger;
 
 public final class CustomDiscs extends JavaPlugin {
 	static CustomDiscs instance;
-	
+
 	@Nullable
 	private VoicePlugin voicechatPlugin;
+	@Nullable
+	private UpdateChecker updateChecker;
 	private Logger pluginLogger;
     private static boolean debugMode = false;
     private static Component[] helpMessage;
@@ -70,13 +79,18 @@ public final class CustomDiscs extends JavaPlugin {
 	public void onLoad() {
 		CustomDiscs.instance = this;
 
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().load();
+
         CommandAPI.onLoad(new CommandAPIPaperConfig(this).verboseOutput(true).fallbackToLatestNMS(true));
 	}
 	
 	@Override
 	public void onEnable() {
 		pluginLogger = getLogger();
-		
+
+		PacketEvents.getAPI().init();
+
 		CommandAPI.onEnable();
 
         new CustomDiscCommand(this).register("customdiscs");
@@ -163,6 +177,29 @@ public final class CustomDiscs extends JavaPlugin {
 		if (isCustomHeadEnable()) {	getServer().getPluginManager().registerEvents(new HeadPlay(), this); }
 		if (isCustomHornEnable()) {	getServer().getPluginManager().registerEvents(new HornPlay(), this); }
 
+		if (getConfig().getBoolean("update-checker.enabled", true)) {
+			String channel = getConfig().getString("update-checker.channel", "release");
+			updateChecker = new UpdateChecker(this, channel);
+			updateChecker.start();
+
+			getServer().getPluginManager().registerEvents(new Listener() {
+				@EventHandler
+				public void onJoin(PlayerJoinEvent event) {
+					if (updateChecker == null) return;
+					String latestVersion = updateChecker.getLatestVersion();
+					if (latestVersion == null) return;
+					Player player = event.getPlayer();
+					if (!player.isOp() && !player.hasPermission("customdiscs.update")) return;
+
+					String currentVersion = getPluginMeta().getVersion();
+					Component playerUpdateMessage = LegacyComponentAmpersand.deserialize(Lang.PREFIX + Lang.UPDATE_AVAILABLE.toString().replace("%latest_version%", latestVersion).replace("%current_version%", currentVersion));
+					Component linkUpdateMessage = LegacyComponentAmpersand.deserialize("&8[&6CustomDiscs&8]&r &7➜ ").append(Component.text(UpdateChecker.MODRINTH_PAGE_URL).color(NamedTextColor.AQUA).decorate(TextDecoration.UNDERLINED).clickEvent(ClickEvent.openUrl(UpdateChecker.MODRINTH_PAGE_URL)).hoverEvent(HoverEvent.showText(Component.text("Click to open the Modrinth page"))));
+					player.sendMessage(playerUpdateMessage);
+					player.sendMessage(linkUpdateMessage);
+				}
+			}, this);
+		}
+
 		// To avoid any "0" values, set it to 1.
 		if (hornCooldown <= 0) {
 			hornCooldown = 1;
@@ -171,26 +208,30 @@ public final class CustomDiscs extends JavaPlugin {
 			hornMaxCooldown = 1;
 		}
 
-		ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
-		protocolManager.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.WORLD_EVENT) {
+		PacketEvents.getAPI().getEventManager().registerListener(new PacketListenerAbstract(PacketListenerPriority.NORMAL) {
 			@Override
-			public void onPacketSending(PacketEvent event) {
-				PacketContainer packet = event.getPacket();
+			public void onPacketSend(PacketSendEvent event) {
+				if (event.getPacketType() != PacketType.Play.Server.EFFECT) return;
+				try {
+					WrapperPlayServerEffect wrapper = new WrapperPlayServerEffect(event);
+					if (wrapper.getType() != 1010) return;
+					if (!isMusicDiscEnable()) return;
+					if (!(event.getPlayer() instanceof Player player)) return;
 
-				if (packet.getIntegers().read(0).toString().equals("1010")) {
-					if (!isMusicDiscEnable()) { return; }
-					Jukebox jukebox = (Jukebox) packet.getBlockPositionModifier().read(0).toLocation(event.getPlayer().getWorld()).getBlock().getState();
+					Vector3i jukeboxPosition = wrapper.getPosition();
+					Location jukeboxLocation = new Location(player.getWorld(), jukeboxPosition.x, jukeboxPosition.y, jukeboxPosition.z);
 
-					if (!jukebox.getRecord().hasItemMeta()) return;
-
-					if (jukebox.getRecord().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(this.plugin, "customdisc"), PersistentDataType.STRING)) {
+					if (JukeboxStateManager.isCustomDiscLocation(jukeboxLocation)) {
 						event.setCancelled(true);
-					}
 
-					//Start the jukebox state manager.
-					//This keeps the jukebox powered while custom song is playing,
-					//which perfectly emulates the vanilla behavior of discs.
-					JukeboxStateManager.start(jukebox);
+						getServer().getRegionScheduler().run(CustomDiscs.this, jukeboxLocation, task ->
+								JukeboxStateManager.start((Jukebox) jukeboxLocation.getBlock().getState())
+						);
+					}
+				} catch (Exception e) {
+					if (isDebugMode()) {
+						pluginLogger.warning("Unexpected packet content detected (" + e.getClass().getSimpleName() + ": " + e.getMessage() + ")");
+					}
 				}
 			}
 		});
@@ -200,6 +241,10 @@ public final class CustomDiscs extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		CommandAPI.onDisable();
+		PacketEvents.getAPI().terminate();
+		if (updateChecker != null) {
+			updateChecker.stop();
+		}
 		if (voicechatPlugin != null) {
 			getServer().getServicesManager().unregister(voicechatPlugin);
 			pluginLogger.info("Successfully unregistered CustomDiscs plugin");

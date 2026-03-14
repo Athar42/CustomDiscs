@@ -59,3 +59,13 @@ custom-head-distance: 16
 
 # The max distance from which music discs can be heard in blocks.
 custom-head-max-distance: 256
+
+# [Update Checker Config]
+
+# Enable automatic update checks against Modrinth.
+# Operators or players with permission "customdiscs.update" are notified on join when an update is available.
+# An initial check is performed on startup, then every 24 hours as long as the server is running.
+update-checker:
+  enabled: true
+  # Release channel to check against: release, beta
+  channel: release

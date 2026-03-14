@@ -1,12 +1,12 @@
 package me.Navoei.customdiscsplugin;
 
 import me.Navoei.customdiscsplugin.language.Lang;
+import me.Navoei.customdiscsplugin.utils.ServerVersionChecker;
+import me.Navoei.customdiscsplugin.utils.TypeChecker;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 
-import me.Navoei.customdiscsplugin.utils.ServerVersionChecker;
-import me.Navoei.customdiscsplugin.utils.TypeChecker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -35,9 +35,9 @@ import java.util.logging.Logger;
 
 public class HopperManager implements Listener {
 
-    CustomDiscs customDiscs = CustomDiscs.getInstance();
+    CustomDiscs plugin = CustomDiscs.getInstance();
     PlayerManager playerManager = PlayerManager.instance();
-    private final Logger pluginLogger = customDiscs.getLogger();
+    private final Logger pluginLogger = plugin.getLogger();
     private final boolean debugModeResult = CustomDiscs.isDebugMode();
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -63,11 +63,11 @@ public class HopperManager implements Listener {
         String songName = PlainTextComponentSerializer.plainText().serialize(songNameComponent);
         Component customActionBarSongPlaying = LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.NOW_PLAYING.toString().replace("%song_name%", songName));
 
-        String soundFileName = discMeta.getPersistentDataContainer().get(new NamespacedKey(customDiscs, "customdisc"), PersistentDataType.STRING);
+        String soundFileName = discMeta.getPersistentDataContainer().get(new NamespacedKey(plugin, "customdisc"), PersistentDataType.STRING);
         
         PersistentDataContainer persistentDataContainer = discMeta.getPersistentDataContainer();
         float range = CustomDiscs.getInstance().musicDiscDistance;
-        NamespacedKey customSoundRangeKey = new NamespacedKey(customDiscs, "range");
+        NamespacedKey customSoundRangeKey = new NamespacedKey(plugin, "range");
 
         if(persistentDataContainer.has(customSoundRangeKey, PersistentDataType.FLOAT)) {
             float soundRange = Optional.ofNullable(persistentDataContainer.get(customSoundRangeKey, PersistentDataType.FLOAT)).orElse(0f);
@@ -78,7 +78,8 @@ public class HopperManager implements Listener {
             eventItemStack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.JUKEBOX_PLAYABLE).build());
         }
 
-        Path soundFilePath = Path.of(customDiscs.getDataFolder().getPath(), "musicdata", soundFileName);
+        Path soundFilePath = Path.of(plugin.getDataFolder().getPath(), "musicdata", soundFileName);
+        JukeboxStateManager.markJukeboxPending(destinationInventory.getLocation().getBlock().getLocation());
         assert VoicePlugin.voicechatServerApi != null;
         playerManager.playAudio(VoicePlugin.voicechatServerApi, soundFilePath, destinationInventory.getLocation().getBlock(), customActionBarSongPlaying, range);
     }

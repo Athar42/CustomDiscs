@@ -1,7 +1,9 @@
 package me.Navoei.customdiscsplugin.utils;
 
-import com.destroystokyo.paper.MaterialTags;
 import me.Navoei.customdiscsplugin.CustomDiscs;
+
+import com.destroystokyo.paper.MaterialTags;
+
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -13,7 +15,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public class TypeChecker {
-    static CustomDiscs customDiscs = CustomDiscs.getInstance();
+    static CustomDiscs plugin = CustomDiscs.getInstance();
 
     // Commented methods are kept for possible future checks usage.
 
@@ -30,11 +32,11 @@ public class TypeChecker {
     public static boolean isCustomMusicDisc(ItemStack itemStack) {
         if (itemStack == null) return false;
         if (itemStack.getItemMeta() == null) return false;
-        return MaterialTags.MUSIC_DISCS.isTagged(itemStack.getType()) && itemStack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(customDiscs, "customdisc"), PersistentDataType.STRING);
+        return MaterialTags.MUSIC_DISCS.isTagged(itemStack.getType()) && itemStack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, "customdisc"), PersistentDataType.STRING);
     }
 
     /*public static boolean isCustomMusicDiscPlayer(Player p) {
-        return p.getInventory().getItemInMainHand().getType().toString().contains("MUSIC_DISC") && p.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(customDiscs, "customdisc"), PersistentDataType.STRING);
+        return p.getInventory().getItemInMainHand().getType().toString().contains("MUSIC_DISC") && p.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, "customdisc"), PersistentDataType.STRING);
     }*/
 
     // GOAT HORNS
@@ -49,11 +51,11 @@ public class TypeChecker {
     
     public static boolean isCustomGoatHorn(PlayerInteractEvent e) {
         if (e.getItem()==null) return false;
-        return e.getItem().getType().equals(Material.GOAT_HORN) && e.getItem().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(customDiscs, "customhorn"), PersistentDataType.STRING);
+        return e.getItem().getType().equals(Material.GOAT_HORN) && e.getItem().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, "customhorn"), PersistentDataType.STRING);
     }
 
     public static boolean isCustomGoatHornPlayer(Player p) {
-        return p.getInventory().getItemInMainHand().getType().equals(Material.GOAT_HORN) && p.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(customDiscs, "customhorn"), PersistentDataType.STRING);
+        return p.getInventory().getItemInMainHand().getType().equals(Material.GOAT_HORN) && p.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, "customhorn"), PersistentDataType.STRING);
     }
 
     // PLAYER HEADS
@@ -97,11 +99,11 @@ public class TypeChecker {
     /*public static boolean isCustomHead(ItemStack itemStack) {
         if (itemStack == null) return false;
         if (itemStack.getItemMeta() == null) return false;
-        return itemStack.getType().toString().contains("PLAYER_HEAD") && itemStack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(customDiscs, "customhead"), PersistentDataType.STRING);
+        return itemStack.getType().toString().contains("PLAYER_HEAD") && itemStack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, "customhead"), PersistentDataType.STRING);
     }*/
 
     public static boolean isCustomHeadPlayer(Player p) {
-        return p.getInventory().getItemInMainHand().getType().equals(Material.PLAYER_HEAD) && p.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(customDiscs, "customhead"), PersistentDataType.STRING);
+        return p.getInventory().getItemInMainHand().getType().equals(Material.PLAYER_HEAD) && p.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, "customhead"), PersistentDataType.STRING);
     }
 
 }

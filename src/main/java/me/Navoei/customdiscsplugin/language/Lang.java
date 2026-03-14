@@ -13,10 +13,10 @@ public enum Lang {
     DOWNLOADING_FILE("downloading-file", "&7Downloading file..."),
     FILE_TOO_LARGE("file-too-large", "&cThe file is larger than %max_download_size%MB."),
     SUCCESSFUL_DOWNLOAD("successful-download", "&aFile successfully downloaded to &7%file_path%&a."),
-    CREATE_DISC("create-disc", "&aCreate a disc by doing &7/cd create filename.extension \"Custom Lore\"&a."),
+    CREATE_DISC("create-disc", "&aCreate a disc by doing &7/cd create %filename% \"Custom Lore\"&a."),
     DOWNLOAD_ERROR("download-error", "&cAn error has occurred while downloading."),
     NOW_PLAYING("now-playing","&6Now playing: %song_name%"),
-    DISC_CONVERTED("disc-converted", "&aConverted disc to new format! &fThis is due to changes in newer Minecraft versions which introduced &ToolTipDisplay&f."),
+    DISC_CONVERTED("disc-converted", "&aConverted disc to new format! &fThis is due to changes in newer Minecraft versions which introduced &7ToolTipDisplay&f."),
     INVALID_RANGE("invalid-range","&cYou need to chose a range between 1 and %range_value%"),
     CREATE_CUSTOM_RANGE("create-custom-range", "&7Your range is set to: &a\"%custom_range%\"."),
     NOT_HOLDING_CUSTOM_GOAT_HORN("not-holding-custom-goathorn", "&cYou must hold a custom goat horn in your main hand."),
@@ -26,7 +26,11 @@ public enum Lang {
     CUSTOM_HEAD_DISABLED("custom-head-disabled", "&7Custom player heads are disabled in the configuration."),
     CUSTOM_HORN_DISABLED("custom-horn-disabled", "&7Custom goat horns are disabled in the configuration."),
     INVALID_PROTOCOL("invalid-protocol", "&cOnly HTTP:// and HTTPS:// URL are allowed."),
-    INVALID_FILENAME_LENGTH("invalid-filename-length", "&cThe maximum file name is restricted to %filename_length_value% characters.");
+    INVALID_FILENAME_LENGTH("invalid-filename-length", "&cThe maximum file name is restricted to %filename_length_value% characters."),
+    FILEBIN_NO_AUDIO("filebin-no-audio", "&cNo supported audio file (wav/mp3/flac) found in this Filebin bin."),
+    FILEBIN_API_ERROR("filebin-api-error", "&cFailed to access Filebin API. The bin may not exist or is unavailable."),
+    FILE_ALREADY_EXISTS("file-already-exists", "&eA file named &7%filename%&e already exists, saving as &7%new_filename%&e instead."),
+    UPDATE_AVAILABLE("update-available", "&eA new version of CustomDiscs is available: &6%latest_version% &7(current: %current_version%)");
 
     private final String path;
     private final String def;
