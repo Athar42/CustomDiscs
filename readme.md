@@ -240,5 +240,5 @@ update-available: '&eA new version of CustomDiscs is available: &6%latest_versio
 
 ---
 
-**Demo video:**
+**Demo video:**\
 https://user-images.githubusercontent.com/64107368/178426026-c454ac66-5133-4f3a-9af9-7f674e022423.mp4
