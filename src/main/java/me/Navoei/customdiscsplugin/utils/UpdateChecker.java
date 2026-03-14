@@ -60,7 +60,7 @@ public class UpdateChecker {
 
             if (response.statusCode() != 200) {
                 if (CustomDiscs.isDebugMode()) {
-                    pluginLogger.warning("§c Modrinth API returned HTTP " + response.statusCode());
+                    pluginLogger.warning("Modrinth API returned HTTP " + response.statusCode());
                 }
                 return;
             }
@@ -84,17 +84,17 @@ public class UpdateChecker {
 
             if (isNewer(retrievedVersion, currentVersion)) {
                 latestVersion = retrievedVersion;
-                pluginLogger.info("§a Update available: " + retrievedVersion + " (current: " + currentVersion + ") — " + MODRINTH_PAGE_URL);
+                pluginLogger.info("Update available: " + retrievedVersion + " (current: " + currentVersion + ") — " + MODRINTH_PAGE_URL);
             } else {
                 latestVersion = null;
                 if (CustomDiscs.isDebugMode()) {
-                    pluginLogger.info("§a Plugin is up to date (" + currentVersion + ").");
+                    pluginLogger.info("Plugin is up to date (" + currentVersion + ").");
                 }
             }
 
         } catch (Exception e) {
             if (CustomDiscs.isDebugMode()) {
-                pluginLogger.warning("§c Check failed: " + e.getMessage());
+                pluginLogger.warning("Check failed: " + e.getMessage());
             }
         }
     }
