@@ -221,21 +221,22 @@ update-available: '&eA new version of CustomDiscs is available: &6%latest_versio
 
 ## Version Support Matrix
 
-| Minecraft version | Paper                                                                         | Folia                                                                         |
-|---|-------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| **1.19** | 1.1.0 – [2.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.1)        | —                                                                             |
-| **1.19.1 – 1.19.3** | 2.2 – [2.2.3](https://github.com/Navoei/CustomDiscs/releases/tag/v2.2.3)      | —                                                                             |
-| **1.19.4** | 2.3 – [2.3.2](https://github.com/Navoei/CustomDiscs/releases/tag/v2.3.2)      | —                                                                             |
-| **1.20, 1.20.1** | 2.4 – [2.4.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.4.1)      | —                                                                             |
-| **1.20.2** | 2.5 – [2.5.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.5.1)      | —                                                                             |
-| **1.20.3 – 1.20.6** | 2.6 – [2.6.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.6.1)      | —                                                                             |
-| **1.21, 1.21.1** | [3.0](https://github.com/Navoei/CustomDiscs/releases/tag/v3.0)                | —                                                                             |
-| **1.21.2, 1.21.3** | [4.1](https://github.com/Navoei/CustomDiscs/releases/tag/v4.1)                | —                                                                             |
-| **1.21.4 – 1.21.5** | 4.2 – [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)          | —                                                                             |
-| **1.21.6, 1.21.7** | [4.5](https://github.com/Navoei/CustomDiscs/releases/tag/v4.5)                | —                                                                             |
-| **1.21.7, 1.21.8** | 5.0 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0)   | 5.1.1 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) |
-| **1.21.9, 1.21.10** | 5.1.2 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) | 5.1.2 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) |
-| **1.21.11** | 5.1.3 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) | 5.1.3 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) |
+| Minecraft version                  | Paper                                                                         | Folia                                                                                             |
+|------------------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| **1.19**                           | 1.1.0 – [2.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.1)        | —                                                                                                 |
+| **1.19.1, 1.19.2, 1.19.3**         | 2.2 – [2.2.3](https://github.com/Navoei/CustomDiscs/releases/tag/v2.2.3)      | —                                                                                                 |
+| **1.19.4**                         | 2.3 – [2.3.2](https://github.com/Navoei/CustomDiscs/releases/tag/v2.3.2)      | —                                                                                                 |
+| **1.20, 1.20.1**                   | 2.4 – [2.4.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.4.1)      | —                                                                                                 |
+| **1.20.2**                         | 2.5 – [2.5.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.5.1)      | —                                                                                                 |
+| **1.20.3, 1.20.4, 1.20.5, 1.20.6** | 2.6 – [2.6.1](https://github.com/Navoei/CustomDiscs/releases/tag/v2.6.1)      | —                                                                                                 |
+| **1.21, 1.21.1**                   | [3.0](https://github.com/Navoei/CustomDiscs/releases/tag/v3.0)                | —                                                                                                 |
+| **1.21.2, 1.21.3**                 | [4.1](https://github.com/Navoei/CustomDiscs/releases/tag/v4.1)                | —                                                                                                 |
+| **1.21.4**                         | 4.2 – [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)          | —                                                                                                 |
+| **1.21.5**                         | [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)          | —                                                                                                 |
+| **1.21.6, 1.21.7-8**               | [4.5](https://github.com/Navoei/CustomDiscs/releases/tag/v4.5)                | —                                                                                                 |
+| **1.21.7-9, 1.21.8**               | 5.0 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0)   | (only since 1.21.8) 5.1.1 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) |
+| **1.21.9, 1.21.10**                | 5.1.2 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) | 5.1.2 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0)                     |
+| **1.21.11**                        | 5.1.3 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) | 5.1.3 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0)                     |
 
 ---
 
