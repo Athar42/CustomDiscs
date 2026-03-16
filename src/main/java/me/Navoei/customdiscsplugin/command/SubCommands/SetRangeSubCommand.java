@@ -28,7 +28,7 @@ public class SetRangeSubCommand extends CommandAPICommand {
 		super("range");
 		this.plugin = plugin;
 		
-		this.withFullDescription(NamedTextColor.GRAY + "Set the range of a disc to the defined value (range from 1 to "+ this.plugin.musicDiscMaxDistance +").");
+		this.withFullDescription(NamedTextColor.GRAY + "Set the range of the custom item in hand (disc: 1–" + (int) this.plugin.musicDiscMaxDistance + ", horn: 1–" + (int) this.plugin.customHornMaxDistance + ", head: 1–" + (int) this.plugin.customHeadMaxDistance + ").");
 		this.withUsage("/cd range <range>");
 		this.withPermission("customdiscs.range");
 
@@ -52,21 +52,21 @@ public class SetRangeSubCommand extends CommandAPICommand {
 		
         float range = Optional.ofNullable(arguments.getByClass("range", Float.class)).orElse(0f);
 
-		float configMusicDiscMaxDistance;
+		float itemMaxRange;
 		if (resultIsCustomHorn) {
 			if (!CustomDiscs.isCustomHornEnable()) { player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CUSTOM_HORN_DISABLED.toString())); return 1; }
-			configMusicDiscMaxDistance = this.plugin.customHornMaxDistance;
+			itemMaxRange = this.plugin.customHornMaxDistance;
 		} else if (resultIsCustomHead) {
 			if (!CustomDiscs.isCustomHeadEnable()) { player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CUSTOM_HEAD_DISABLED.toString())); return 1; }
-			configMusicDiscMaxDistance = this.plugin.customHeadMaxDistance;
+			itemMaxRange = this.plugin.customHeadMaxDistance;
 		} else {
 			if (!CustomDiscs.isMusicDiscEnable()) { player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CUSTOM_MUSIC_DISABLED.toString())); return 1; }
-			configMusicDiscMaxDistance = this.plugin.musicDiscMaxDistance;
+			itemMaxRange = this.plugin.musicDiscMaxDistance;
 		}
 
 
-		if ( range < 1 || range > configMusicDiscMaxDistance) {
-            player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.INVALID_RANGE.toString().replace("%range_value%", Float.toString(configMusicDiscMaxDistance))));
+		if ( range < 1 || range > itemMaxRange) {
+            player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.INVALID_RANGE.toString().replace("%range_value%", Float.toString(itemMaxRange))));
             return 1;
         }
 

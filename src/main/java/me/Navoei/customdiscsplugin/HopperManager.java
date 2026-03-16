@@ -1,12 +1,12 @@
 package me.Navoei.customdiscsplugin;
 
 import me.Navoei.customdiscsplugin.language.Lang;
+import me.Navoei.customdiscsplugin.utils.ServerVersionChecker;
+import me.Navoei.customdiscsplugin.utils.TypeChecker;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.TooltipDisplay;
 
-import me.Navoei.customdiscsplugin.utils.ServerVersionChecker;
-import me.Navoei.customdiscsplugin.utils.TypeChecker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -20,6 +20,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -27,15 +29,15 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.nio.file.Path;
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 public class HopperManager implements Listener {
 
-    CustomDiscs customDiscs = CustomDiscs.getInstance();
+    CustomDiscs plugin = CustomDiscs.getInstance();
     PlayerManager playerManager = PlayerManager.instance();
-    private final Logger pluginLogger = customDiscs.getLogger();
+    private final Logger pluginLogger = plugin.getLogger();
     private final boolean debugModeResult = CustomDiscs.isDebugMode();
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -43,34 +45,43 @@ public class HopperManager implements Listener {
         if (debugModeResult) {
             pluginLogger.info("DEBUG - HopperManager -> Enter : onJukeboxInsertFromHopper");
         }
-        if (event.getDestination().getLocation() == null) return;
-        if (!event.getDestination().getType().equals(InventoryType.JUKEBOX)) return;
-        if (!TypeChecker.isCustomMusicDisc(event.getItem())) return;
 
-        Component songNameComponent = Objects.requireNonNull(event.getItem().getItemMeta().lore()).get(0).asComponent();
+        Inventory destinationInventory = event.getDestination();
+
+        if (destinationInventory.getLocation() == null) return;
+        if (!destinationInventory.getType().equals(InventoryType.JUKEBOX)) return;
+
+        ItemStack eventItemStack = event.getItem();
+
+        if (!TypeChecker.isCustomMusicDisc(eventItemStack)) return;
+
+        ItemMeta discMeta = eventItemStack.getItemMeta();
+
+        List<Component> discLore = discMeta.lore();
+        if (discLore == null || discLore.isEmpty()) return;
+        Component songNameComponent = discLore.getFirst().asComponent();
         String songName = PlainTextComponentSerializer.plainText().serialize(songNameComponent);
         Component customActionBarSongPlaying = LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.NOW_PLAYING.toString().replace("%song_name%", songName));
 
-        ItemMeta discMeta = event.getItem().getItemMeta();
-        String soundFileName = discMeta.getPersistentDataContainer().get(new NamespacedKey(customDiscs, "customdisc"), PersistentDataType.STRING);
+        String soundFileName = discMeta.getPersistentDataContainer().get(new NamespacedKey(plugin, "customdisc"), PersistentDataType.STRING);
         
-        PersistentDataContainer persistentDataContainer = event.getItem().getItemMeta().getPersistentDataContainer();
+        PersistentDataContainer persistentDataContainer = discMeta.getPersistentDataContainer();
         float range = CustomDiscs.getInstance().musicDiscDistance;
-        NamespacedKey customSoundRangeKey = new NamespacedKey(customDiscs, "range");
+        NamespacedKey customSoundRangeKey = new NamespacedKey(plugin, "range");
 
         if(persistentDataContainer.has(customSoundRangeKey, PersistentDataType.FLOAT)) {
             float soundRange = Optional.ofNullable(persistentDataContainer.get(customSoundRangeKey, PersistentDataType.FLOAT)).orElse(0f);
             range = Math.min(soundRange, CustomDiscs.getInstance().musicDiscMaxDistance);
         }
 
-        if (!event.getItem().hasData(DataComponentTypes.TOOLTIP_DISPLAY) || !event.getItem().getData(DataComponentTypes.TOOLTIP_DISPLAY).hiddenComponents().contains(DataComponentTypes.JUKEBOX_PLAYABLE)) {
-            event.getItem().setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.JUKEBOX_PLAYABLE).build());
+        if (!eventItemStack.hasData(DataComponentTypes.TOOLTIP_DISPLAY) || !eventItemStack.getData(DataComponentTypes.TOOLTIP_DISPLAY).hiddenComponents().contains(DataComponentTypes.JUKEBOX_PLAYABLE)) {
+            eventItemStack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.JUKEBOX_PLAYABLE).build());
         }
 
-        Path soundFilePath = Path.of(customDiscs.getDataFolder().getPath(), "musicdata", soundFileName);
+        Path soundFilePath = Path.of(plugin.getDataFolder().getPath(), "musicdata", soundFileName);
+        JukeboxStateManager.markJukeboxPending(destinationInventory.getLocation().getBlock().getLocation());
         assert VoicePlugin.voicechatServerApi != null;
-        playerManager.playAudio(VoicePlugin.voicechatServerApi, soundFilePath, event.getDestination().getLocation().getBlock(), customActionBarSongPlaying, range);
-
+        playerManager.playAudio(VoicePlugin.voicechatServerApi, soundFilePath, destinationInventory.getLocation().getBlock(), customActionBarSongPlaying, range);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -79,21 +90,23 @@ public class HopperManager implements Listener {
             pluginLogger.info("DEBUG - HopperManager -> Enter : onJukeboxEjectToHopper");
         }
 
+        Inventory sourceInventory = event.getSource();
+
+        if (sourceInventory.getLocation() == null) return;
+        if (!sourceInventory.getType().equals(InventoryType.JUKEBOX)) return;
         if (!TypeChecker.isCustomMusicDisc(event.getItem())) return;
-        if (event.getSource().getLocation() == null) return;
-        if (!event.getSource().getType().equals(InventoryType.JUKEBOX)) return;
 
         if (ServerVersionChecker.isPaperAPI()) {
             if (!(event.getDestination().getHolder(false) instanceof HopperMinecart)) return;
 
-            InventoryHolder holderSource = event.getSource().getHolder(false);
+            InventoryHolder holderSource = sourceInventory.getHolder(false);
             if (holderSource instanceof BlockState) {
                 playerManager.stopDisc(((BlockState) holderSource).getBlock());
             }
         } else {
             if (!(event.getDestination().getHolder() instanceof HopperMinecart)) return;
 
-            InventoryHolder holderSource = event.getSource().getHolder();
+            InventoryHolder holderSource = sourceInventory.getHolder();
             if (holderSource instanceof BlockState) {
                 playerManager.stopDisc(((BlockState) holderSource).getBlock());
             }
@@ -107,7 +120,7 @@ public class HopperManager implements Listener {
         }
         for (BlockState blockState : event.getChunk().getTileEntities()) {
             if (blockState instanceof Jukebox jukebox) {
-                if (!jukebox.hasRecord()) return;
+                if (!jukebox.hasRecord()) continue;
                 if (!PlayerManager.instance().isAudioPlayerPlaying(blockState.getLocation()) && TypeChecker.isCustomMusicDisc(jukebox.getRecord())) {
                     jukebox.stopPlaying();
                 }

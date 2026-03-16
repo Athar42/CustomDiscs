@@ -1,6 +1,7 @@
 package me.Navoei.customdiscsplugin.event;
 
 import me.Navoei.customdiscsplugin.CustomDiscs;
+import me.Navoei.customdiscsplugin.JukeboxStateManager;
 import me.Navoei.customdiscsplugin.PlayerManager;
 import me.Navoei.customdiscsplugin.VoicePlugin;
 import me.Navoei.customdiscsplugin.language.Lang;
@@ -23,6 +24,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -33,12 +35,13 @@ import org.bukkit.persistence.PersistentDataType;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 public class JukeBox implements Listener{
 
-    CustomDiscs customDiscs = CustomDiscs.getInstance();
+    CustomDiscs plugin = CustomDiscs.getInstance();
     PlayerManager playerManager = PlayerManager.instance();
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -54,11 +57,11 @@ public class JukeBox implements Listener{
         if (isCustomMusicDisc(event.getItem()) && !jukeboxContainsDisc(block)) {
 
             ItemMeta discMeta = event.getItem().getItemMeta();
-            String soundFileName = discMeta.getPersistentDataContainer().get(new NamespacedKey(customDiscs, "customdisc"), PersistentDataType.STRING);
+            String soundFileName = discMeta.getPersistentDataContainer().get(new NamespacedKey(plugin, "customdisc"), PersistentDataType.STRING);
             
             PersistentDataContainer persistentDataContainer = discMeta.getPersistentDataContainer();
             float range = CustomDiscs.getInstance().musicDiscDistance;
-            NamespacedKey customSoundRangeKey = new NamespacedKey(customDiscs, "range");
+            NamespacedKey customSoundRangeKey = new NamespacedKey(plugin, "range");
 
             if(persistentDataContainer.has(customSoundRangeKey, PersistentDataType.FLOAT)) {
                 float soundRange = Optional.ofNullable(persistentDataContainer.get(customSoundRangeKey, PersistentDataType.FLOAT)).orElse(0f);
@@ -71,13 +74,14 @@ public class JukeBox implements Listener{
                 player.sendMessage(textComponent);
             }
 
-            Path soundFilePath = Path.of(customDiscs.getDataFolder().getPath(), "musicdata", soundFileName);
+            Path soundFilePath = Path.of(plugin.getDataFolder().getPath(), "musicdata", soundFileName);
 
             if (soundFilePath.toFile().exists()) {
                 Component songNameComponent = Objects.requireNonNull(discMeta.lore()).get(0).asComponent();
                 String songName = PlainTextComponentSerializer.plainText().serialize(songNameComponent);
                 Component customActionBarSongPlaying = LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.NOW_PLAYING.toString().replace("%song_name%", songName));
 
+                JukeboxStateManager.markJukeboxPending(block.getLocation());
                 assert VoicePlugin.voicechatServerApi != null;
                 playerManager.playAudio(VoicePlugin.voicechatServerApi, soundFilePath, block, customActionBarSongPlaying, range);
             } else {
@@ -132,15 +136,22 @@ public class JukeBox implements Listener{
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onJukeboxExplode(EntityExplodeEvent event) {
+        onJukeboxExplosion(event.blockList());
+    }
 
-        for (Block explodedBlock : event.blockList()) {
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onJukeboxBlockExplode(BlockExplodeEvent event) {
+        onJukeboxExplosion(event.blockList());
+    }
+
+    private void onJukeboxExplosion(List<Block> blockList) {
+        for (Block explodedBlock : blockList) {
             if (explodedBlock.getType() == Material.JUKEBOX) {
                 Jukebox jukebox = (Jukebox) explodedBlock.getState();
-                if (!isCustomMusicDisc(jukebox.getRecord())) return;
+                if (!isCustomMusicDisc(jukebox.getRecord())) continue;
                 playerManager.stopDisc(explodedBlock);
             }
         }
-
     }
 
     public boolean jukeboxContainsDisc(Block b) {
@@ -151,7 +162,7 @@ public class JukeBox implements Listener{
     public boolean isCustomMusicDisc(ItemStack itemStack) {
         if (itemStack == null) return false;
         if (itemStack.getItemMeta() == null) return false;
-        return itemStack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(customDiscs, "customdisc"));
+        return itemStack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, "customdisc"));
     }
 
 }
