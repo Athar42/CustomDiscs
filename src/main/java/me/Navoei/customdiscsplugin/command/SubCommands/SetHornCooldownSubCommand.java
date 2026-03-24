@@ -55,12 +55,12 @@ public class SetHornCooldownSubCommand extends CommandAPICommand {
                 return 0;
         }
 
-        ItemStack disc = new ItemStack(player.getInventory().getItemInMainHand());
-        ItemMeta meta = disc.getItemMeta();
-        PersistentDataContainer data = meta.getPersistentDataContainer();
+        ItemStack hornCopy = new ItemStack(player.getInventory().getItemInMainHand());
+        ItemMeta itemMeta = hornCopy.getItemMeta();
+        PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
 
-        data.set(new NamespacedKey(this.plugin, "goat_horn_cooldown"), PersistentDataType.INTEGER, Math.min(goatCooldown, CustomDiscs.getInstance().hornMaxCooldown));
-        player.getInventory().getItemInMainHand().setItemMeta(meta);
+        persistentDataContainer.set(new NamespacedKey(this.plugin, "goat_horn_cooldown"), PersistentDataType.INTEGER, Math.min(goatCooldown, CustomDiscs.getInstance().hornMaxCooldown));
+        player.getInventory().getItemInMainHand().setItemMeta(itemMeta);
 
         player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CREATE_CUSTOM_GOAT_COOLDOWN.toString().replace("%custom_goat_cooldown%", Integer.toString(goatCooldown))));
                 

@@ -1,4 +1,4 @@
-# Custom Discs v5.2.0
+# Custom Discs v5.3.0
 ### For Paper and Folia
 ### 1.21.7 to 1.21.11
 
@@ -20,6 +20,10 @@ Play custom music discs, goat horns and player heads using the [Simple Voice Cha
 > The Simple Voice Chat mod is required on both the client and the server.
 
 - Music files go into `plugins/CustomDiscs/musicdata/`
+- Subdirectories can be enabled in `config.yml` via the `subdirectory-depth` setting:
+  - `none` (default): all files must be in the root of `musicdata/`
+  - `single`: one level of subdirectory (e.g. `musicdata/rock/song.mp3`)
+  - `unrestricted`: unlimited depth (e.g. `musicdata/rock/metal/song.mp3`)
 - Supported formats: `.wav`, `.flac`, `.mp3`
 - Use `/customdisc` or `/cd` to see available commands
 
@@ -81,10 +85,13 @@ Downloads a specific file from the bin.
 
 | Permission | Description                                                          |
 |------------|----------------------------------------------------------------------|
+| `customdiscs.*` | Grants all CustomDiscs permissions                                   |
 | `customdiscs.create` | Create a custom disc, goat horn or player head                       |
 | `customdiscs.download` | Download a file from a URL                                           |
 | `customdiscs.range` | Set the audio range of a disc                                        |
 | `customdiscs.horncooldown` | Set the cooldown for custom goat horns                               |
+| `customdiscs.revert` | Revert a custom item back to its original vanilla state              |
+| `customdiscs.reload` | Reload the plugin configuration and language files                   |
 | `customdiscs.update` | Receive an update notification on join if a new version is available |
 
 > Playing discs does not require any permission.
@@ -98,6 +105,27 @@ The range must be between 1 and the maximum value set in `config.yml` for the re
 
 ```
 /cd range 100
+```
+
+---
+
+## Reverting a custom item
+
+Use `/cd revert` while holding a custom disc, goat horn, or player head to revert it back to its original vanilla state.\
+All custom data (sound file, lore, range, cooldown) is then removed.
+
+```
+/cd revert
+```
+
+---
+
+## Reloading the configuration
+
+Use `/cd reload` to reload `config.yml` and `lang.yml` without restarting the server.
+
+```
+/cd reload
 ```
 
 ---
@@ -117,6 +145,12 @@ filename-maximum-length: 100
 
 # The master volume of music discs from 0-1. (You can set values like 0.5 for 50% volume).
 music-disc-volume: 1
+
+# Subdirectory depth allowed in musicdata folder. Possible values are :
+# none: all files must be in the root of musicdata (default)
+# single: one level of subdirectory allowed (e.g., musicdata/rock/song.mp3)
+# unrestricted: unlimited subdirectory depth (e.g., musicdata/rock/metal/song.mp3)
+subdirectory-depth: none
 
 # Debug Mode - To display some more logging information and Stack Trace informations
 debugMode: false
@@ -149,6 +183,12 @@ custom-horn-distance: 16
 # The max distance from which custom horns can be heard in blocks.
 custom-horn-max-distance: 256
 
+# The default instrument to restore when reverting a custom goat horn.
+# Used only if the original instrument could not be saved at creation time.
+# Valid values: ponder_goat_horn, sing_goat_horn, seek_goat_horn, feel_goat_horn,
+#               admire_goat_horn, call_goat_horn, yearn_goat_horn, dream_goat_horn
+default-horn-instrument: ponder_goat_horn
+
 # The default cooldown time for horns in ticks from 1 to the max value of horn-max-cooldown (1 second is 20 ticks).
 horn-cooldown: 140
 
@@ -163,10 +203,10 @@ custom-head-enable: true
 # Enable "Now playing" message for player heads.
 custom-head-playing-enable: true
 
-# The distance from which music discs can be heard in blocks.
+# The distance from which player heads can be heard in blocks.
 custom-head-distance: 16
 
-# The max distance from which music discs can be heard in blocks.
+# The max distance from which player heads can be heard in blocks.
 custom-head-max-distance: 256
 
 # [Update Checker Config]
@@ -178,6 +218,9 @@ update-checker:
   enabled: true
   # Release channel to check against: release, beta
   channel: release
+
+# Do not modify this value — it is used for automatic config migration.
+config-version: 1
 ```
 
 ---
@@ -214,6 +257,11 @@ invalid-filename-length: '&cThe maximum file name is restricted to %filename_len
 filebin-no-audio: '&cNo supported audio file (wav/mp3/flac) found in this Filebin bin.'
 filebin-api-error: '&cFailed to access Filebin API. The bin may not exist or is unavailable.'
 file-already-exists: '&eA file named &7%filename%&e already exists, saving as &7%new_filename%&e instead.'
+subdirectory-not-allowed: '&cSubdirectories are not allowed in musicdata.'
+subdirectory-depth-exceeded: '&cOnly one level of subdirectory is allowed in musicdata.'
+revert-success: '&aItem successfully reverted.'
+revert-not-custom: '&cThe item in your hand is not a custom disc, horn or head.'
+reload-success: '&aConfiguration reloaded successfully.'
 update-available: '&eA new version of CustomDiscs is available: &6%latest_version% &7(current: %current_version%)'
 ```
 
@@ -232,11 +280,11 @@ update-available: '&eA new version of CustomDiscs is available: &6%latest_versio
 | **1.21, 1.21.1**                   | [3.0](https://github.com/Navoei/CustomDiscs/releases/tag/v3.0)                | —                                                                                                 |
 | **1.21.2, 1.21.3**                 | [4.1](https://github.com/Navoei/CustomDiscs/releases/tag/v4.1)                | —                                                                                                 |
 | **1.21.4**                         | 4.2 – [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)          | —                                                                                                 |
-| **1.21.5**                         | [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)          | —                                                                                                 |
+| **1.21.5**                         | [4.4](https://github.com/Navoei/CustomDiscs/releases/tag/v4.4)                | —                                                                                                 |
 | **1.21.6, 1.21.7-8**               | [4.5](https://github.com/Navoei/CustomDiscs/releases/tag/v4.5)                | —                                                                                                 |
-| **1.21.7-9, 1.21.8**               | 5.0 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0)   | (only since 1.21.8) 5.1.1 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) |
-| **1.21.9, 1.21.10**                | 5.1.2 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) | 5.1.2 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0)                     |
-| **1.21.11**                        | 5.1.3 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0) | 5.1.3 – [5.2.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.2.0)                     |
+| **1.21.7-9, 1.21.8**               | 5.0 – [5.3.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.3.0)   | (only since 1.21.8) 5.1.1 – [5.3.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.3.0) |
+| **1.21.9, 1.21.10**                | 5.1.2 – [5.3.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.3.0) | 5.1.2 – [5.3.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.3.0)                     |
+| **1.21.11**                        | 5.1.3 – [5.3.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.3.0) | 5.1.3 – [5.3.0](https://modrinth.com/plugin/customdiscs-plugin/version/5.3.0)                     |
 
 ---
 

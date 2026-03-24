@@ -13,7 +13,6 @@ public class ServerVersionChecker {
     private static final String REQUIRED_PAPER_VERSION = "1.21.7-9"; // Set the PaperMC required version
     private static final String REQUIRED_FOLIA_VERSION = "1.21.8-2"; // Set the Folia required version
     private final Logger pluginLogger;
-    private final boolean debugModeResult = CustomDiscs.isDebugMode();
     public static boolean paperAPIcheck;
 
     public ServerVersionChecker(JavaPlugin plugin) {
@@ -38,7 +37,7 @@ public class ServerVersionChecker {
             String serverType = serverInfoExtracted.group(1); // Extract the server type (Should be "Paper", but can be forks like "Purpur", "Spigot", ...)
             String buildVersion = serverInfoExtracted.group(2); // Extract the full version info (For example : 1.21.7-9-main@5661fbb)
 
-            if(debugModeResult) {
+            if(CustomDiscs.isDebugMode()) {
                 pluginLogger.info("DEBUG - Detected Server Type: " + serverType);
                 pluginLogger.info("DEBUG - Server Full Version: " + versionMessage);
             }
@@ -46,7 +45,7 @@ public class ServerVersionChecker {
             // As we only officially support Paper, we look up for it specifically
             if ("paper".equalsIgnoreCase(serverType)) {
                 String cleanVersion = cleanBuildVersion(buildVersion);
-                if(debugModeResult) {
+                if(CustomDiscs.isDebugMode()) {
                     pluginLogger.info("DEBUG - Extracted Version: " + cleanVersion);
                 }
 
@@ -58,7 +57,7 @@ public class ServerVersionChecker {
                 paperAPIcheck = true;
             } else if ("folia".equalsIgnoreCase(serverType)) {
                 String cleanVersion = cleanBuildVersion(buildVersion);
-                if(debugModeResult) {
+                if(CustomDiscs.isDebugMode()) {
                     pluginLogger.info("DEBUG - Extracted Version: " + cleanVersion);
                 }
 

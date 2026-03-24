@@ -154,8 +154,8 @@ public class JukeBox implements Listener{
         }
     }
 
-    public boolean jukeboxContainsDisc(Block b) {
-        Jukebox jukebox = (Jukebox) b.getLocation().getBlock().getState();
+    public boolean jukeboxContainsDisc(Block block) {
+        Jukebox jukebox = (Jukebox) block.getLocation().getBlock().getState();
         return jukebox.getRecord().getType() != Material.AIR;
     }
 

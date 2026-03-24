@@ -38,11 +38,10 @@ public class HopperManager implements Listener {
     CustomDiscs plugin = CustomDiscs.getInstance();
     PlayerManager playerManager = PlayerManager.instance();
     private final Logger pluginLogger = plugin.getLogger();
-    private final boolean debugModeResult = CustomDiscs.isDebugMode();
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onJukeboxInsertFromHopper(InventoryMoveItemEvent event) {
-        if (debugModeResult) {
+        if (CustomDiscs.isDebugMode()) {
             pluginLogger.info("DEBUG - HopperManager -> Enter : onJukeboxInsertFromHopper");
         }
 
@@ -86,7 +85,7 @@ public class HopperManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onJukeboxEjectToHopperMinecart(InventoryMoveItemEvent event) {
-        if (debugModeResult) {
+        if (CustomDiscs.isDebugMode()) {
             pluginLogger.info("DEBUG - HopperManager -> Enter : onJukeboxEjectToHopper");
         }
 
@@ -115,7 +114,7 @@ public class HopperManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChunkLoad(ChunkLoadEvent event) {
-        if (debugModeResult) {
+        if (CustomDiscs.isDebugMode()) {
             pluginLogger.info("DEBUG - HopperManager -> Enter : onChunkLoad");
         }
         for (BlockState blockState : event.getChunk().getTileEntities()) {

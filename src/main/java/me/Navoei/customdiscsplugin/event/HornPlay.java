@@ -78,11 +78,11 @@ public class HornPlay implements Listener{
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerInteract(PlayerInteractEvent event) throws IOException {
-        ItemStack item = event.getItem();
+        ItemStack heldItem = event.getItem();
         Player player = event.getPlayer();
 
-        if (item == null) return;
-        if (item.getType() != Material.GOAT_HORN) return;
+        if (heldItem == null) return;
+        if (heldItem.getType() != Material.GOAT_HORN) return;
 
         Block block = event.getClickedBlock();
         if (player.hasCooldown(Material.GOAT_HORN)) return;
@@ -95,9 +95,9 @@ public class HornPlay implements Listener{
                 if (targetBlockType.name().contains("_BED") || targetBlockType.name().contains("_BOAT") || targetBlockType.name().contains("_BUTTON") || targetBlockType.name().contains("CHEST") || targetBlockType.name().contains("_DOOR") /*|| targetBlockType.name().contains("_FENCE_GATE") */|| targetBlockType.name().contains("_GATE") || targetBlockType.name().contains("MINECART") || targetBlockType.name().contains("POTTED_") || targetBlockType.name().contains("_SIGN") || targetBlockType.name().contains("_TRAPDOOR")) return;
             }
 
-            String soundFileName = event.getItem().getItemMeta().getPersistentDataContainer().get(new NamespacedKey(plugin, "customhorn"), PersistentDataType.STRING);
+            String soundFileName = heldItem.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(plugin, "customhorn"), PersistentDataType.STRING);
 
-            @Nonnull PersistentDataContainer persistentDataContainer = event.getItem().getItemMeta().getPersistentDataContainer();
+            @Nonnull PersistentDataContainer persistentDataContainer = heldItem.getItemMeta().getPersistentDataContainer();
 
             float range = CustomDiscs.getInstance().customHornDistance;
             NamespacedKey customSoundRangeKey = new NamespacedKey(plugin, "range");
@@ -121,7 +121,7 @@ public class HornPlay implements Listener{
 
                 String songName = "Unknown sound";
 
-                MusicInstrument instrument = item.getDataOrDefault(DataComponentTypes.INSTRUMENT, null);
+                MusicInstrument instrument = heldItem.getDataOrDefault(DataComponentTypes.INSTRUMENT, null);
                 if (instrument != null) {
                     Component songNameComponent = instrument.description(); // This is the one you're asking for
                     songName = PlainTextComponentSerializer.plainText().serialize(songNameComponent);

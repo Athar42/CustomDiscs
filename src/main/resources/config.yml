@@ -9,6 +9,12 @@ filename-maximum-length: 100
 # The master volume of music discs from 0-1. (You can set values like 0.5 for 50% volume).
 music-disc-volume: 1
 
+# Subdirectory depth allowed in musicdata folder. Possible values are :
+# none: all files must be in the root of musicdata (default)
+# single: one level of subdirectory allowed (e.g., musicdata/rock/song.mp3)
+# unrestricted: unlimited subdirectory depth (e.g., musicdata/rock/metal/song.mp3)
+subdirectory-depth: none
+
 # Debug Mode - To display some more logging information and Stack Trace informations
 debugMode: false
 
@@ -40,6 +46,12 @@ custom-horn-distance: 16
 # The max distance from which custom horns can be heard in blocks.
 custom-horn-max-distance: 256
 
+# The default instrument to restore when reverting a custom goat horn.
+# Used only if the original instrument could not be saved at creation time.
+# Valid values: ponder_goat_horn, sing_goat_horn, seek_goat_horn, feel_goat_horn,
+#               admire_goat_horn, call_goat_horn, yearn_goat_horn, dream_goat_horn
+default-horn-instrument: ponder_goat_horn
+
 # The default cooldown time for horns in ticks from 1 to the max value of horn-max-cooldown (1 second is 20 ticks).
 horn-cooldown: 140
 
@@ -54,10 +66,10 @@ custom-head-enable: true
 # Enable "Now playing" message for player heads.
 custom-head-playing-enable: true
 
-# The distance from which music discs can be heard in blocks.
+# The distance from which player heads can be heard in blocks.
 custom-head-distance: 16
 
-# The max distance from which music discs can be heard in blocks.
+# The max distance from which player heads can be heard in blocks.
 custom-head-max-distance: 256
 
 # [Update Checker Config]
@@ -69,3 +81,6 @@ update-checker:
   enabled: true
   # Release channel to check against: release, beta
   channel: release
+
+# Do not modify this value — it is used for automatic config migration.
+config-version: 1
