@@ -118,7 +118,7 @@ public class HopperManager implements Listener {
         if (debugModeResult) {
             pluginLogger.info("DEBUG - HopperManager -> Enter : onChunkLoad");
         }
-        for (BlockState blockState : event.getChunk().getTileEntities()) {
+        for (BlockState blockState : event.getChunk().getTileEntities(false)) {
             if (blockState instanceof Jukebox jukebox) {
                 if (!jukebox.hasRecord()) continue;
                 if (!PlayerManager.instance().isAudioPlayerPlaying(blockState.getLocation()) && TypeChecker.isCustomMusicDisc(jukebox.getRecord())) {
