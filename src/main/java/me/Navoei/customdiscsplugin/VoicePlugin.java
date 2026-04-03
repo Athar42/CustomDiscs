@@ -34,7 +34,6 @@ public class VoicePlugin implements VoicechatPlugin {
     public static VolumeCategory playerHeads;
 
     private final Logger pluginLogger = CustomDiscs.getInstance().getLogger();
-    private final boolean debugModeResult = CustomDiscs.isDebugMode();
 
     /**
      * @return the unique ID for this voice chat plugin
@@ -116,7 +115,7 @@ public class VoicePlugin implements VoicechatPlugin {
 
         } catch (Exception e) {
             pluginLogger.severe("An error occurred while trying to set the Music Disc icon category.");
-            if(debugModeResult) {
+            if(CustomDiscs.isDebugMode()) {
                 pluginLogger.log(Level.SEVERE, "Exception output: ", e);
             }
         }
@@ -146,7 +145,7 @@ public class VoicePlugin implements VoicechatPlugin {
 
         } catch (Exception e) {
             pluginLogger.severe("An error occurred while trying to set the Goat Horn icon category.");
-            if(debugModeResult) {
+            if(CustomDiscs.isDebugMode()) {
                 pluginLogger.log(Level.SEVERE, "Exception output: ", e);
             }
         }
@@ -176,7 +175,7 @@ public class VoicePlugin implements VoicechatPlugin {
 
         } catch (Exception e) {
             pluginLogger.severe("An error occurred while trying to set the Player Head icon category.");
-            if(debugModeResult) {
+            if(CustomDiscs.isDebugMode()) {
                 pluginLogger.log(Level.SEVERE, "Exception output: ", e);
             }
         }

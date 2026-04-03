@@ -29,7 +29,7 @@ public class UpdateChecker {
     private static final long CHECK_INTERVAL_HOURS = 24;
 
     private volatile String latestVersion = null;
-    private ScheduledTask hourlyTask = null;
+    private ScheduledTask scheduledCheckTask = null;
 
     public UpdateChecker(CustomDiscs plugin, String versionChannel) {
         this.plugin = plugin;
@@ -38,25 +38,25 @@ public class UpdateChecker {
     }
 
     public void start() {
-        plugin.getServer().getAsyncScheduler().runNow(plugin, t -> runCheck());
-        hourlyTask = plugin.getServer().getAsyncScheduler().runAtFixedRate(plugin, t -> runCheck(), CHECK_INTERVAL_HOURS, CHECK_INTERVAL_HOURS, TimeUnit.HOURS);
+        plugin.getServer().getAsyncScheduler().runNow(plugin, task -> runCheck());
+        scheduledCheckTask = plugin.getServer().getAsyncScheduler().runAtFixedRate(plugin, task -> runCheck(), CHECK_INTERVAL_HOURS, CHECK_INTERVAL_HOURS, TimeUnit.HOURS);
     }
 
     public void stop() {
-        if (hourlyTask != null) {
-            hourlyTask.cancel();
+        if (scheduledCheckTask != null) {
+            scheduledCheckTask.cancel();
         }
     }
 
     private void runCheck() {
         try {
-            HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+            HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
             String apiUrl = versionChannel.equals("release") ? MODRINTH_API_URL + "?version_type=release" : MODRINTH_API_URL;
 
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).header("User-Agent", "CustomDiscs/" + plugin.getPluginMeta().getVersion() + " (github.com/Navoei/CustomDiscs)").timeout(Duration.ofSeconds(10)).GET().build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 if (CustomDiscs.isDebugMode()) {
@@ -68,14 +68,28 @@ public class UpdateChecker {
             JsonArray versions = JsonParser.parseString(response.body()).getAsJsonArray();
             if (versions.isEmpty()) return;
 
+            String serverVersion = plugin.getServer().getMinecraftVersion();
+
             String retrievedVersion = null;
             for (JsonElement jsonElement : versions) {
                 JsonObject readVersion = jsonElement.getAsJsonObject();
                 String readVersionType = readVersion.get("version_type").getAsString();
-                if (readVersionType.equals("release") || (versionChannel.equals("beta") && readVersionType.equals("beta"))) {
-                    retrievedVersion = readVersion.get("version_number").getAsString();
-                    break;
+                if (!readVersionType.equals("release") && !(versionChannel.equals("beta") && readVersionType.equals("beta"))) {
+                    continue;
                 }
+                JsonArray gameVersions = readVersion.getAsJsonArray("game_versions");
+                if (gameVersions != null && !gameVersions.isEmpty()) {
+                    boolean compatible = false;
+                    for (JsonElement gameVersion : gameVersions) {
+                        if (gameVersion.getAsString().equals(serverVersion)) {
+                            compatible = true;
+                            break;
+                        }
+                    }
+                    if (!compatible) continue;
+                }
+                retrievedVersion = readVersion.get("version_number").getAsString();
+                break;
             }
 
             if (retrievedVersion == null) return;
@@ -134,8 +148,8 @@ public class UpdateChecker {
             VersionInfo retrievedVersionInfo = parseVersion(remoteVersion);
             VersionInfo currentVersionInfo = parseVersion(currentVersion);
 
-            int maxLen = Math.max(retrievedVersionInfo.base().length, currentVersionInfo.base().length);
-            for (int i = 0; i < maxLen; i++) {
+            int maxLength = Math.max(retrievedVersionInfo.base().length, currentVersionInfo.base().length);
+            for (int i = 0; i < maxLength; i++) {
                 int retrievedVersionDigit = i < retrievedVersionInfo.base().length ? retrievedVersionInfo.base()[i] : 0;
                 int currentVersionDigit = i < currentVersionInfo.base().length ? currentVersionInfo.base()[i] : 0;
                 if (retrievedVersionDigit != currentVersionDigit) return retrievedVersionDigit > currentVersionDigit;

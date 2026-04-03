@@ -66,12 +66,13 @@ public class HeadPlay implements Listener{
         PersistentDataContainer persistentDataContainer = skull.getPersistentDataContainer();
 
         if (persistentDataContainer.has(new NamespacedKey(plugin, "customhead"), PersistentDataType.STRING)) {
+            event.setCancelled(true);
 
             String soundFileName = persistentDataContainer.get(new NamespacedKey(plugin, "customhead"), PersistentDataType.STRING);
 
             float range = CustomDiscs.getInstance().customHeadDistance;
             NamespacedKey customSoundRangeKey = new NamespacedKey(plugin, "range");
-            NamespacedKey customLore = new NamespacedKey(plugin, "headlore");
+            NamespacedKey headLoreKey = new NamespacedKey(plugin, "headlore");
 
             if(persistentDataContainer.has(customSoundRangeKey, PersistentDataType.FLOAT)) {
                 float soundRange = Optional.ofNullable(persistentDataContainer.get(customSoundRangeKey, PersistentDataType.FLOAT)).orElse(0f);
@@ -81,7 +82,7 @@ public class HeadPlay implements Listener{
             Path soundFilePath = Path.of(plugin.getDataFolder().getPath(), "musicdata", soundFileName);
 
             if (soundFilePath.toFile().exists()) {
-                Component songNameComponent = Optional.ofNullable(persistentDataContainer.get(customLore, PersistentDataType.STRING)).map(GsonComponentSerializer.gson()::deserialize).orElse(Component.text("Unknown Song", NamedTextColor.GRAY));
+                Component songNameComponent = Optional.ofNullable(persistentDataContainer.get(headLoreKey, PersistentDataType.STRING)).map(GsonComponentSerializer.gson()::deserialize).orElse(Component.text("Unknown Song", NamedTextColor.GRAY));
                 String songName = PlainTextComponentSerializer.plainText().serialize(songNameComponent);
                 Component customActionBarSongPlaying = LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.NOW_PLAYING.toString().replace("%song_name%", songName));
 
@@ -98,12 +99,12 @@ public class HeadPlay implements Listener{
     // Delay will only be triggered on custom player head created with this plugin
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onHeadPlace(BlockPlaceEvent event) {
-        ItemStack item = event.getItemInHand();
+        ItemStack heldItem = event.getItemInHand();
 
-        if (!TypeChecker.isHead(item.getType())) return;
-        if (!(item.getItemMeta() instanceof SkullMeta meta)) return;
+        if (!TypeChecker.isHead(heldItem.getType())) return;
+        if (!(heldItem.getItemMeta() instanceof SkullMeta skullMeta)) return;
 
-        PersistentDataContainer itemPDC = meta.getPersistentDataContainer();
+        PersistentDataContainer itemPDC = skullMeta.getPersistentDataContainer();
         if (!itemPDC.has(new NamespacedKey(plugin, "customhead"), PersistentDataType.STRING)) return;
 
         Block block = event.getBlockPlaced();
@@ -117,13 +118,13 @@ public class HeadPlay implements Listener{
             NamespacedKey rangeKey = new NamespacedKey(plugin, "range");
 
             if (itemPDC.has(headKey, PersistentDataType.STRING)) {
-                String customheadValue = itemPDC.get(headKey, PersistentDataType.STRING);
-                blockPDC.set(headKey, PersistentDataType.STRING, customheadValue);
+                String customHeadValue = itemPDC.get(headKey, PersistentDataType.STRING);
+                blockPDC.set(headKey, PersistentDataType.STRING, customHeadValue);
             }
 
             if (itemPDC.has(loreKey, PersistentDataType.STRING)) {
-                String headloreValue = itemPDC.get(loreKey, PersistentDataType.STRING);
-                blockPDC.set(loreKey, PersistentDataType.STRING, headloreValue);
+                String headLoreValue = itemPDC.get(loreKey, PersistentDataType.STRING);
+                blockPDC.set(loreKey, PersistentDataType.STRING, headLoreValue);
             }
 
             if (itemPDC.has(rangeKey, PersistentDataType.FLOAT)) {
@@ -145,11 +146,11 @@ public class HeadPlay implements Listener{
         PersistentDataContainer headPDC = headSkull.getPersistentDataContainer();
         if (!headPDC.has(new NamespacedKey(plugin, "customhead"), PersistentDataType.STRING)) return;
 
-        Block noteblockBlockChecker = block.getRelative(BlockFace.DOWN);
+        Block noteBlockBelow = block.getRelative(BlockFace.DOWN);
 
-        if (noteblockBlockChecker.getType() != Material.NOTE_BLOCK) return;
+        if (noteBlockBelow.getType() != Material.NOTE_BLOCK) return;
 
-        playerManager.stopDisc(noteblockBlockChecker);
+        playerManager.stopDisc(noteBlockBelow);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -173,24 +174,24 @@ public class HeadPlay implements Listener{
 
             PersistentDataContainer droppedItemPDC = droppedMeta.getPersistentDataContainer();
 
-            String customHeadRetrieved = blockPDC.get(headKey, PersistentDataType.STRING);
-            if (customHeadRetrieved != null) {
-                droppedItemPDC.set(headKey, PersistentDataType.STRING, customHeadRetrieved);
+            String customHeadValue = blockPDC.get(headKey, PersistentDataType.STRING);
+            if (customHeadValue != null) {
+                droppedItemPDC.set(headKey, PersistentDataType.STRING, customHeadValue);
             }
 
-            String loreRetrieved = blockPDC.get(loreKey, PersistentDataType.STRING);
-            if (loreRetrieved != null) {
-                droppedItemPDC.set(loreKey, PersistentDataType.STRING, loreRetrieved);
+            String headLoreValue = blockPDC.get(loreKey, PersistentDataType.STRING);
+            if (headLoreValue != null) {
+                droppedItemPDC.set(loreKey, PersistentDataType.STRING, headLoreValue);
 
-                Component deserialized = GsonComponentSerializer.gson().deserialize(loreRetrieved);
+                Component deserializedLore = GsonComponentSerializer.gson().deserialize(headLoreValue);
                 @Nullable List<Component> itemLore = new ArrayList<>();
-                itemLore.add(deserialized);
+                itemLore.add(deserializedLore);
                 droppedMeta.lore(itemLore);
             }
 
-            Float rangeRetrieved = blockPDC.get(rangeKey, PersistentDataType.FLOAT);
-            if (rangeRetrieved != null) {
-                droppedItemPDC.set(rangeKey, PersistentDataType.FLOAT, rangeRetrieved);
+            Float rangeValue = blockPDC.get(rangeKey, PersistentDataType.FLOAT);
+            if (rangeValue != null) {
+                droppedItemPDC.set(rangeKey, PersistentDataType.FLOAT, rangeValue);
             }
 
             droppedStack.setItemMeta(droppedMeta);
@@ -221,35 +222,35 @@ public class HeadPlay implements Listener{
             PersistentDataContainer persistentDataContainer = skull.getPersistentDataContainer();
             if (!persistentDataContainer.has(headKey, PersistentDataType.STRING)) continue;
 
-            Block noteblock = explodedBlock.getRelative(BlockFace.DOWN);
-            if (noteblock.getType() == Material.NOTE_BLOCK) playerManager.stopDisc(noteblock);
+            Block noteBlockBelow = explodedBlock.getRelative(BlockFace.DOWN);
+            if (noteBlockBelow.getType() == Material.NOTE_BLOCK) playerManager.stopDisc(noteBlockBelow);
 
             iterator.remove();
 
             for (ItemStack dropItemStack : explodedBlock.getDrops()) {
                 if (!TypeChecker.isHead(dropItemStack.getType()) && !TypeChecker.isWallHead(dropItemStack.getType())) continue;
 
-                ItemMeta meta = dropItemStack.getItemMeta();
-                if (meta == null) continue;
+                ItemMeta itemMeta = dropItemStack.getItemMeta();
+                if (itemMeta == null) continue;
 
-                PersistentDataContainer dropPersistentDataContainer = meta.getPersistentDataContainer();
+                PersistentDataContainer dropPersistentDataContainer = itemMeta.getPersistentDataContainer();
 
-                String customHead = persistentDataContainer.get(headKey, PersistentDataType.STRING);
-                if (customHead != null) dropPersistentDataContainer.set(headKey, PersistentDataType.STRING, customHead);
+                String customHeadValue = persistentDataContainer.get(headKey, PersistentDataType.STRING);
+                if (customHeadValue != null) dropPersistentDataContainer.set(headKey, PersistentDataType.STRING, customHeadValue);
 
-                String lore = persistentDataContainer.get(loreKey, PersistentDataType.STRING);
-                if (lore != null) {
-                    dropPersistentDataContainer.set(loreKey, PersistentDataType.STRING, lore);
-                    Component deserialized = GsonComponentSerializer.gson().deserialize(lore);
+                String headLoreValue = persistentDataContainer.get(loreKey, PersistentDataType.STRING);
+                if (headLoreValue != null) {
+                    dropPersistentDataContainer.set(loreKey, PersistentDataType.STRING, headLoreValue);
+                    Component deserializedLore = GsonComponentSerializer.gson().deserialize(headLoreValue);
                     @Nullable List<Component> itemLore = new ArrayList<>();
-                    itemLore.add(deserialized);
-                    meta.lore(itemLore);
+                    itemLore.add(deserializedLore);
+                    itemMeta.lore(itemLore);
                 }
 
-                Float range = persistentDataContainer.get(rangeKey, PersistentDataType.FLOAT);
-                if (range != null) dropPersistentDataContainer.set(rangeKey, PersistentDataType.FLOAT, range);
+                Float rangeValue = persistentDataContainer.get(rangeKey, PersistentDataType.FLOAT);
+                if (rangeValue != null) dropPersistentDataContainer.set(rangeKey, PersistentDataType.FLOAT, rangeValue);
 
-                dropItemStack.setItemMeta(meta);
+                dropItemStack.setItemMeta(itemMeta);
                 explodedBlock.getWorld().dropItemNaturally(explodedBlock.getLocation(), dropItemStack);
             }
 
@@ -263,11 +264,11 @@ public class HeadPlay implements Listener{
 
         if (block.getType() != Material.NOTE_BLOCK) return;
 
-        Block headBlockChecker = block.getRelative(BlockFace.UP);
+        Block headBlockAbove = block.getRelative(BlockFace.UP);
 
-        if (!TypeChecker.isHead(headBlockChecker.getType())) return;
+        if (!TypeChecker.isHead(headBlockAbove.getType())) return;
 
-        Skull headSkull = (Skull) headBlockChecker.getState();
+        Skull headSkull = (Skull) headBlockAbove.getState();
 
         PersistentDataContainer headPDC = headSkull.getPersistentDataContainer();
         if (!headPDC.has(new NamespacedKey(plugin, "customhead"), PersistentDataType.STRING)) return;
@@ -289,10 +290,10 @@ public class HeadPlay implements Listener{
         for (Block explodedBlock : blockList) {
             if (explodedBlock.getType() != Material.NOTE_BLOCK) continue;
 
-            Block headBlockChecker = explodedBlock.getRelative(BlockFace.UP);
-            if (!TypeChecker.isHead(headBlockChecker.getType())) continue;
+            Block headBlockAbove = explodedBlock.getRelative(BlockFace.UP);
+            if (!TypeChecker.isHead(headBlockAbove.getType())) continue;
 
-            Skull headSkull = (Skull) headBlockChecker.getState();
+            Skull headSkull = (Skull) headBlockAbove.getState();
             PersistentDataContainer headPersistentDataContainer = headSkull.getPersistentDataContainer();
             if (!headPersistentDataContainer.has(new NamespacedKey(plugin, "customhead"), PersistentDataType.STRING)) continue;
 
@@ -313,35 +314,35 @@ public class HeadPlay implements Listener{
         NamespacedKey loreKey = new NamespacedKey(plugin, "headlore");
         NamespacedKey rangeKey = new NamespacedKey(plugin, "range");
 
-        Block noteblock = block.getRelative(BlockFace.DOWN);
-        if (noteblock.getType() == Material.NOTE_BLOCK) playerManager.stopDisc(noteblock);
+        Block noteBlockBelow = block.getRelative(BlockFace.DOWN);
+        if (noteBlockBelow.getType() == Material.NOTE_BLOCK) playerManager.stopDisc(noteBlockBelow);
 
         event.setCancelled(true);
 
         for (ItemStack dropItemStack : block.getDrops()) {
             if (!TypeChecker.isHead(dropItemStack.getType()) && !TypeChecker.isWallHead(dropItemStack.getType())) continue;
 
-            ItemMeta meta = dropItemStack.getItemMeta();
-            if (meta == null) continue;
+            ItemMeta itemMeta = dropItemStack.getItemMeta();
+            if (itemMeta == null) continue;
 
-            PersistentDataContainer dropPersistentDataContainer = meta.getPersistentDataContainer();
+            PersistentDataContainer dropPersistentDataContainer = itemMeta.getPersistentDataContainer();
 
-            String customHead = persistentDataContainer.get(headKey, PersistentDataType.STRING);
-            if (customHead != null) dropPersistentDataContainer.set(headKey, PersistentDataType.STRING, customHead);
+            String customHeadValue = persistentDataContainer.get(headKey, PersistentDataType.STRING);
+            if (customHeadValue != null) dropPersistentDataContainer.set(headKey, PersistentDataType.STRING, customHeadValue);
 
-            String lore = persistentDataContainer.get(loreKey, PersistentDataType.STRING);
-            if (lore != null) {
-                dropPersistentDataContainer.set(loreKey, PersistentDataType.STRING, lore);
-                Component deserialized = GsonComponentSerializer.gson().deserialize(lore);
+            String headLoreValue = persistentDataContainer.get(loreKey, PersistentDataType.STRING);
+            if (headLoreValue != null) {
+                dropPersistentDataContainer.set(loreKey, PersistentDataType.STRING, headLoreValue);
+                Component deserializedLore = GsonComponentSerializer.gson().deserialize(headLoreValue);
                 @Nullable List<Component> itemLore = new ArrayList<>();
-                itemLore.add(deserialized);
-                meta.lore(itemLore);
+                itemLore.add(deserializedLore);
+                itemMeta.lore(itemLore);
             }
 
-            Float range = persistentDataContainer.get(rangeKey, PersistentDataType.FLOAT);
-            if (range != null) dropPersistentDataContainer.set(rangeKey, PersistentDataType.FLOAT, range);
+            Float rangeValue = persistentDataContainer.get(rangeKey, PersistentDataType.FLOAT);
+            if (rangeValue != null) dropPersistentDataContainer.set(rangeKey, PersistentDataType.FLOAT, rangeValue);
 
-            dropItemStack.setItemMeta(meta);
+            dropItemStack.setItemMeta(itemMeta);
             block.getWorld().dropItemNaturally(block.getLocation(), dropItemStack);
         }
 

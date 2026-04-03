@@ -19,3 +19,37 @@ dependencies:
       load: BEFORE
       required: true
       join-classpath: true
+
+permissions:
+  customdiscs.*:
+    description: Grants all CustomDiscs permissions
+    default: op
+    children:
+      customdiscs.create: true
+      customdiscs.download: true
+      customdiscs.revert: true
+      customdiscs.range: true
+      customdiscs.horncooldown: true
+      customdiscs.reload: true
+      customdiscs.update: true
+  customdiscs.create:
+    description: Allows creating custom discs, horns and heads
+    default: op
+  customdiscs.download:
+    description: Allows downloading audio files from a URL
+    default: op
+  customdiscs.revert:
+    description: Allows reverting custom items to their original state
+    default: op
+  customdiscs.range:
+    description: Allows setting the audio range of custom items
+    default: op
+  customdiscs.horncooldown:
+    description: Allows setting the cooldown of custom goat horns
+    default: op
+  customdiscs.reload:
+    description: Allows reloading the plugin configuration
+    default: op
+  customdiscs.update:
+    description: Receives update notifications on join
+    default: op

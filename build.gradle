@@ -16,9 +16,11 @@ version = plugin_version
 group = maven_group
 
 processResources {
+    def pluginVersion = providers.gradleProperty("plugin_version")
+    def bukkitApiVersion = providers.gradleProperty("bukkit_api_version")
     filesMatching(["plugin.yml", "paper-plugin.yml"]) {
-        expand "plugin_version": plugin_version,
-                "bukkit_api_version": bukkit_api_version
+        expand "plugin_version": pluginVersion.get(),
+                "bukkit_api_version": bukkitApiVersion.get()
     }
 }
 

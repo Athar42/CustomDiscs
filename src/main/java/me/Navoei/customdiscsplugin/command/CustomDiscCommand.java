@@ -3,6 +3,8 @@ package me.Navoei.customdiscsplugin.command;
 import me.Navoei.customdiscsplugin.CustomDiscs;
 import me.Navoei.customdiscsplugin.command.SubCommands.CreateSubCommand;
 import me.Navoei.customdiscsplugin.command.SubCommands.DownloadSubCommand;
+import me.Navoei.customdiscsplugin.command.SubCommands.ReloadSubCommand;
+import me.Navoei.customdiscsplugin.command.SubCommands.RevertSubCommand;
 import me.Navoei.customdiscsplugin.command.SubCommands.SetHornCooldownSubCommand;
 import me.Navoei.customdiscsplugin.command.SubCommands.SetRangeSubCommand;
 
@@ -29,7 +31,9 @@ public class CustomDiscCommand extends CommandAPICommand {
 		this.withSubcommand(new DownloadSubCommand(plugin));
 		this.withSubcommand(new SetRangeSubCommand(plugin));
 		this.withSubcommand(new SetHornCooldownSubCommand(plugin));
-		
+		this.withSubcommand(new RevertSubCommand(plugin));
+		this.withSubcommand(new ReloadSubCommand(plugin));
+
 		this.executesPlayer(this::onCommandPlayer);
 		this.executesConsole(this::onCommandConsole);
 	}

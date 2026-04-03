@@ -4,9 +4,9 @@ import me.Navoei.customdiscsplugin.CustomDiscs;
 import me.Navoei.customdiscsplugin.utils.TypeChecker;
 import me.Navoei.customdiscsplugin.language.Lang;
 
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.arguments.TextArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 
@@ -34,8 +34,8 @@ import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,21 +50,52 @@ public class CreateSubCommand extends CommandAPICommand {
 		this.withUsage("/customdisc create <filename> \"Custom Lore\"");
 		this.withPermission("customdiscs.create");
 
-		this.withArguments(new StringArgument("filename").replaceSuggestions(ArgumentSuggestions.stringCollection((sender) -> {
+		this.withArguments(new TextArgument("filename").replaceSuggestions((info, builder) -> {
 			File musicDataFolder = new File(this.plugin.getDataFolder(), "musicdata");
-			if (!musicDataFolder.isDirectory()) {
-				return List.of();
+			if (!musicDataFolder.isDirectory()) return builder.buildFuture();
+
+			int maxDepth = switch (this.plugin.subdirectoryDepth) {
+				case "none" -> 0;
+				case "single" -> 1;
+				default -> Integer.MAX_VALUE;
+			};
+
+			String remaining = builder.getRemaining();
+
+			if (remaining.startsWith("\"")) {
+				SuggestionsBuilder quotedSuggestionBuilder = builder.createOffset(builder.getStart() + 1);
+				String typedInput = quotedSuggestionBuilder.getRemaining();
+
+				String directoryPrefix = "";
+				int lastSlashIndex = typedInput.lastIndexOf('/');
+				if (lastSlashIndex >= 0) {
+					directoryPrefix = typedInput.substring(0, lastSlashIndex + 1);
+				}
+
+				int currentDepth = directoryPrefix.isEmpty() ? 0 : (int) directoryPrefix.chars().filter(character -> character == '/').count();
+				File currentDirectory = directoryPrefix.isEmpty() ? musicDataFolder : new File(musicDataFolder, directoryPrefix);
+
+				suggestCurrentDirectory(currentDirectory, directoryPrefix, currentDepth, maxDepth, quotedSuggestionBuilder);
+				return quotedSuggestionBuilder.buildFuture();
+			} else {
+				String typedInput = remaining.toLowerCase();
+				File[] files = musicDataFolder.listFiles();
+				if (files != null) {
+					for (File file : files) {
+						if (!file.isFile()) continue;
+						String fileExtension = getFileExtension(file.getName());
+						if (fileExtension.equals("wav") || fileExtension.equals("mp3") || fileExtension.equals("flac")) {
+							if (file.getName().toLowerCase().startsWith(typedInput)) {
+								builder.suggest(file.getName());
+							}
+						}
+					}
+				}
+				return builder.buildFuture();
 			}
-			
-			File[] files = musicDataFolder.listFiles();
-			if (files == null) {
-				return List.of();
-			}
-			
-			return Arrays.stream(files).filter(file -> !file.isDirectory()).map(File::getName).toList();
-		})));
+		}));
 		
-		this.withArguments(new TextArgument("song_name"));
+		this.withArguments(new TextArgument("songName"));
 		
 		this.executesPlayer(this::onCommandPlayer);
 		this.executesConsole(this::onCommandConsole);
@@ -72,8 +103,8 @@ public class CreateSubCommand extends CommandAPICommand {
 	
 	private int onCommandPlayer(Player player, CommandArguments arguments) {
 
-		ItemStack item = player.getInventory().getItemInMainHand();
-		boolean resultIsMusicDisc = TypeChecker.isMusicDisc(item);
+		ItemStack heldItem = player.getInventory().getItemInMainHand();
+		boolean resultIsMusicDisc = TypeChecker.isMusicDisc(heldItem);
 		boolean resultIsHorn = TypeChecker.isGoatHornPlayer(player);
 		boolean resultIsHead = TypeChecker.isHeadPlayer(player);
 
@@ -83,13 +114,18 @@ public class CreateSubCommand extends CommandAPICommand {
 		}
 
 		String filename = Objects.requireNonNull(arguments.getByClass("filename", String.class));
-		if (filename.contains("../")) {
+		if (!this.plugin.isMusicdataPathSafe(filename)) {
 			player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.INVALID_FILENAME.toString()));
 			return 0;
 		}
+		if (!this.plugin.isMusicdataDepthAllowed(filename)) {
+			Lang depthMessage = "none".equals(this.plugin.subdirectoryDepth) ? Lang.SUBDIRECTORY_NOT_ALLOWED : Lang.SUBDIRECTORY_DEPTH_EXCEEDED;
+			player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + depthMessage.toString()));
+			return 0;
+		}
 		
-		File getDirectory = new File(this.plugin.getDataFolder(), "musicdata");
-		File songFile = new File(getDirectory.getPath(), filename);
+		File musicDataDirectory = new File(this.plugin.getDataFolder(), "musicdata");
+		File songFile = new File(musicDataDirectory.getPath(), filename);
 		if (songFile.exists()) {
 			if (!getFileExtension(filename).equals("wav") && !getFileExtension(filename).equals("mp3") && !getFileExtension(filename).equals("flac")) {
 				player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.INVALID_FORMAT.toString()));
@@ -100,24 +136,31 @@ public class CreateSubCommand extends CommandAPICommand {
 			return 0;
 		}
 		
-		String song_name = Objects.requireNonNull(arguments.getByClass("song_name", String.class));
+		String songName = Objects.requireNonNull(arguments.getByClass("songName", String.class));
 
 		if (resultIsMusicDisc) {
 			if (!CustomDiscs.isMusicDiscEnable()) { player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CUSTOM_MUSIC_DISABLED.toString())); return 1; }
-			ItemStack disc = new ItemStack(player.getInventory().getItemInMainHand());
-			disc.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.JUKEBOX_PLAYABLE).build());
-			ItemMeta meta = disc.getItemMeta();
+			ItemStack discCopy = new ItemStack(player.getInventory().getItemInMainHand());
+			discCopy.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().addHiddenComponents(DataComponentTypes.JUKEBOX_PLAYABLE).build());
+			ItemMeta itemMeta = discCopy.getItemMeta();
 			@Nullable List<Component> itemLore = new ArrayList<>();
-			final TextComponent customLoreSong = Component.text().decoration(TextDecoration.ITALIC, false).content(song_name).color(NamedTextColor.GRAY).build();
+			final TextComponent customLoreSong = Component.text().decoration(TextDecoration.ITALIC, false).content(songName).color(NamedTextColor.GRAY).build();
 			itemLore.add(customLoreSong);
-			meta.lore(itemLore);
+			itemMeta.lore(itemLore);
 
-			PersistentDataContainer data = meta.getPersistentDataContainer();
-			data.set(new NamespacedKey(this.plugin, "customdisc"), PersistentDataType.STRING, filename);
-			player.getInventory().getItemInMainHand().setItemMeta(meta);
+			PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
+			persistentDataContainer.set(new NamespacedKey(this.plugin, "customdisc"), PersistentDataType.STRING, filename);
+			player.getInventory().getItemInMainHand().setItemMeta(itemMeta);
 		} else if (resultIsHorn) {
 			if (!CustomDiscs.isCustomHornEnable()) { player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CUSTOM_HORN_DISABLED.toString())); return 1; }
-			final TextComponent customLoreSong = Component.text().decoration(TextDecoration.ITALIC, false).content(song_name).color(NamedTextColor.GRAY).build();
+
+			String originalInstrumentKey = null;
+			MusicInstrument currentInstrument = heldItem.getData(DataComponentTypes.INSTRUMENT);
+			if (currentInstrument instanceof org.bukkit.Keyed keyed) {
+				originalInstrumentKey = keyed.getKey().toString();
+			}
+
+			final TextComponent customLoreSong = Component.text().decoration(TextDecoration.ITALIC, false).content(songName).color(NamedTextColor.GRAY).build();
 			MusicInstrument customInstrument = MusicInstrument.create(builder -> {
 				builder.copyFrom(InstrumentKeys.ADMIRE_GOAT_HORN)
 						.description(customLoreSong)
@@ -128,33 +171,36 @@ public class CreateSubCommand extends CommandAPICommand {
 								SoundEventKeys.INTENTIONALLY_EMPTY
 						));
 			});
-			item.setData(DataComponentTypes.INSTRUMENT, customInstrument);
+			heldItem.setData(DataComponentTypes.INSTRUMENT, customInstrument);
 
-			ItemStack disc = new ItemStack(player.getInventory().getItemInMainHand());
-			ItemMeta meta = disc.getItemMeta();
-			PersistentDataContainer data = meta.getPersistentDataContainer();
-			data.set(new NamespacedKey(this.plugin, "customhorn"), PersistentDataType.STRING, filename);
-			player.getInventory().getItemInMainHand().setItemMeta(meta);
+			ItemStack hornCopy = new ItemStack(player.getInventory().getItemInMainHand());
+			ItemMeta itemMeta = hornCopy.getItemMeta();
+			PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
+			persistentDataContainer.set(new NamespacedKey(this.plugin, "customhorn"), PersistentDataType.STRING, filename);
+			if (originalInstrumentKey != null && !persistentDataContainer.has(new NamespacedKey(this.plugin, "originalinstrument"), PersistentDataType.STRING)) {
+				persistentDataContainer.set(new NamespacedKey(this.plugin, "originalinstrument"), PersistentDataType.STRING, originalInstrumentKey);
+			}
+			player.getInventory().getItemInMainHand().setItemMeta(itemMeta);
 		} else {
 			//Must be a player head.
 			if (!CustomDiscs.isCustomHeadEnable()) { player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CUSTOM_HEAD_DISABLED.toString())); return 1; }
-			final Component customLoreHead = Component.text().decoration(TextDecoration.ITALIC, false).content(song_name).color(NamedTextColor.GRAY).build();
-			String serialized = GsonComponentSerializer.gson().serialize(customLoreHead);
+			final Component customLoreHead = Component.text().decoration(TextDecoration.ITALIC, false).content(songName).color(NamedTextColor.GRAY).build();
+			String serializedLore = GsonComponentSerializer.gson().serialize(customLoreHead);
 
-			ItemStack disc = new ItemStack(player.getInventory().getItemInMainHand());
-			ItemMeta meta = disc.getItemMeta();
+			ItemStack headCopy = new ItemStack(player.getInventory().getItemInMainHand());
+			ItemMeta itemMeta = headCopy.getItemMeta();
 			@Nullable List<Component> itemLore = new ArrayList<>();
-			final TextComponent customLoreSong = Component.text().decoration(TextDecoration.ITALIC, false).content(song_name).color(NamedTextColor.GRAY).build();
+			final TextComponent customLoreSong = Component.text().decoration(TextDecoration.ITALIC, false).content(songName).color(NamedTextColor.GRAY).build();
 			itemLore.add(customLoreSong);
-			meta.lore(itemLore);
+			itemMeta.lore(itemLore);
 
-			PersistentDataContainer data = meta.getPersistentDataContainer();
-			data.set(new NamespacedKey(this.plugin, "customhead"), PersistentDataType.STRING, filename);
-			data.set(new NamespacedKey(this.plugin, "headlore"), PersistentDataType.STRING, serialized);
-			player.getInventory().getItemInMainHand().setItemMeta(meta);
+			PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
+			persistentDataContainer.set(new NamespacedKey(this.plugin, "customhead"), PersistentDataType.STRING, filename);
+			persistentDataContainer.set(new NamespacedKey(this.plugin, "headlore"), PersistentDataType.STRING, serializedLore);
+			player.getInventory().getItemInMainHand().setItemMeta(itemMeta);
 		}
 		player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CREATE_FILENAME.toString().replace("%filename%", filename)));
-		player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CREATE_CUSTOM_NAME.toString().replace("%custom_name%", song_name)));
+		player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CREATE_CUSTOM_NAME.toString().replace("%custom_name%", songName)));
 		return 1;
 	}
 	
@@ -163,10 +209,38 @@ public class CreateSubCommand extends CommandAPICommand {
 		return 1;
 	}
 	
-	private String getFileExtension(String s) {
-		int index = s.lastIndexOf(".");
-		if (index > 0) {
-			return s.substring(index + 1);
+	private void suggestCurrentDirectory(File directory, String pathPrefix, int currentDepth, int maxDepth, SuggestionsBuilder builder) {
+		if (!directory.isDirectory()) return;
+
+		Path musicDataPath = new File(this.plugin.getDataFolder(), "musicdata").toPath().toAbsolutePath().normalize();
+		Path directoryPath = directory.toPath().toAbsolutePath().normalize();
+		if (!directoryPath.startsWith(musicDataPath)) return;
+
+		String typedInput = builder.getRemaining().toLowerCase();
+		File[] files = directory.listFiles();
+		if (files == null) return;
+		for (File file : files) {
+			if (file.isFile()) {
+				String fileExtension = getFileExtension(file.getName());
+				if (fileExtension.equals("wav") || fileExtension.equals("mp3") || fileExtension.equals("flac")) {
+					String suggestion = pathPrefix + file.getName() + "\"";
+					if (suggestion.toLowerCase().startsWith(typedInput)) {
+						builder.suggest(suggestion);
+					}
+				}
+			} else if (file.isDirectory() && currentDepth < maxDepth) {
+				String suggestion = pathPrefix + file.getName();
+				if (suggestion.toLowerCase().startsWith(typedInput)) {
+					builder.suggest(suggestion);
+				}
+			}
+		}
+	}
+
+	private String getFileExtension(String filename) {
+		int dotIndex = filename.lastIndexOf(".");
+		if (dotIndex > 0) {
+			return filename.substring(dotIndex + 1);
 		} else {
 			return "";
 		}

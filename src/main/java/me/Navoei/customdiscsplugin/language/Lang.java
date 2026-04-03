@@ -30,6 +30,11 @@ public enum Lang {
     FILEBIN_NO_AUDIO("filebin-no-audio", "&cNo supported audio file (wav/mp3/flac) found in this Filebin bin."),
     FILEBIN_API_ERROR("filebin-api-error", "&cFailed to access Filebin API. The bin may not exist or is unavailable."),
     FILE_ALREADY_EXISTS("file-already-exists", "&eA file named &7%filename%&e already exists, saving as &7%new_filename%&e instead."),
+    SUBDIRECTORY_NOT_ALLOWED("subdirectory-not-allowed", "&cSubdirectories are not allowed in musicdata."),
+    SUBDIRECTORY_DEPTH_EXCEEDED("subdirectory-depth-exceeded", "&cOnly one level of subdirectory is allowed in musicdata."),
+    REVERT_SUCCESS("revert-success", "&aItem successfully reverted."),
+    REVERT_NOT_CUSTOM("revert-not-custom", "&cThe item in your hand is not a custom disc, horn or head."),
+    RELOAD_SUCCESS("reload-success", "&aConfiguration reloaded successfully."),
     UPDATE_AVAILABLE("update-available", "&eA new version of CustomDiscs is available: &6%latest_version% &7(current: %current_version%)");
 
     private final String path;

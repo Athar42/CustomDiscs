@@ -40,8 +40,8 @@ public class SetRangeSubCommand extends CommandAPICommand {
 	
 	private int onCommandPlayer(Player player, CommandArguments arguments) {
 
-        ItemStack item = player.getInventory().getItemInMainHand();
-		boolean resultIsCustomDisc = TypeChecker.isCustomMusicDisc(item);
+        ItemStack heldItem = player.getInventory().getItemInMainHand();
+		boolean resultIsCustomDisc = TypeChecker.isCustomMusicDisc(heldItem);
 		boolean resultIsCustomHorn = TypeChecker.isCustomGoatHornPlayer(player);
 		boolean resultIsCustomHead = TypeChecker.isCustomHeadPlayer(player);
 
@@ -70,10 +70,10 @@ public class SetRangeSubCommand extends CommandAPICommand {
             return 1;
         }
 
-        ItemMeta meta = item.getItemMeta();
-        PersistentDataContainer data = meta.getPersistentDataContainer();
-		data.set(new NamespacedKey(this.plugin, "range"), PersistentDataType.FLOAT, range);
-		player.getInventory().getItemInMainHand().setItemMeta(meta);
+        ItemMeta itemMeta = heldItem.getItemMeta();
+        PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
+		persistentDataContainer.set(new NamespacedKey(this.plugin, "range"), PersistentDataType.FLOAT, range);
+		player.getInventory().getItemInMainHand().setItemMeta(itemMeta);
 
         player.sendMessage(LegacyComponentSerializer.legacyAmpersand().deserialize(Lang.PREFIX + Lang.CREATE_CUSTOM_RANGE.toString().replace("%custom_range%", Float.toString(range))));
 
